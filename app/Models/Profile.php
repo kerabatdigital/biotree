@@ -44,11 +44,14 @@ class Profile extends Model
     }
 
     /**
-     * The profile's saved theme merged over the app defaults.
+     * The profile's saved theme inputs, merged over the app defaults and
+     * expanded into concrete render values.
      */
     public function effectiveTheme(): array
     {
-        return array_merge(config('biotree.default_theme', []), $this->theme ?? []);
+        return \App\Support\ThemeBuilder::build(
+            array_merge(config('biotree.default_theme', []), $this->theme ?? [])
+        );
     }
 
     /**

@@ -52,21 +52,40 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Default public-page theme
+    | Theme
     |--------------------------------------------------------------------------
-    | Merged under each profile's saved `theme` JSON (Phase 4 lets users edit it).
+    | default_theme holds the editable INPUTS. App\Support\ThemeBuilder turns
+    | those into the concrete values the public page renders (muted, button
+    | colours, etc.), so the editor / preview / public page always agree.
     */
     'default_theme' => [
         'preset' => 'midnight',
         'bg' => '#0a0a0a',
         'bg_end' => '#18181b',
         'text' => '#ffffff',
-        'muted' => '#a1a1aa',
-        'button_bg' => 'rgba(255,255,255,0.08)',
-        'button_text' => '#ffffff',
-        'button_radius' => '16px',
         'accent' => '#34d399',
-        'avatar_shape' => 'circle',
+        'button_style' => 'soft',   // soft | solid | outline
+        'button_radius' => '16px',
+        'avatar_shape' => 'circle', // circle | rounded | square
+        'font' => 'figtree',
+    ],
+
+    'theme_presets' => [
+        'midnight' => ['bg' => '#0a0a0a', 'bg_end' => '#18181b', 'text' => '#ffffff', 'accent' => '#34d399'],
+        'ocean' => ['bg' => '#0b1120', 'bg_end' => '#0e2a47', 'text' => '#eaf2ff', 'accent' => '#38bdf8'],
+        'sunset' => ['bg' => '#2a0e0e', 'bg_end' => '#4a1d1d', 'text' => '#fff5f0', 'accent' => '#fb7185'],
+        'grape' => ['bg' => '#160f2e', 'bg_end' => '#2a1a54', 'text' => '#f3ecff', 'accent' => '#a78bfa'],
+        'forest' => ['bg' => '#0a1710', 'bg_end' => '#12281b', 'text' => '#eafff2', 'accent' => '#4ade80'],
+        'paper' => ['bg' => '#fafaf9', 'bg_end' => '#f0efec', 'text' => '#1c1917', 'accent' => '#f97316'],
+    ],
+
+    'fonts' => [
+        'figtree' => ['label' => 'Figtree', 'family' => 'Figtree', 'bunny' => 'figtree:400,500,600,700,800'],
+        'inter' => ['label' => 'Inter', 'family' => 'Inter', 'bunny' => 'inter:400,500,600,700'],
+        'poppins' => ['label' => 'Poppins', 'family' => 'Poppins', 'bunny' => 'poppins:400,500,600,700'],
+        'space-grotesk' => ['label' => 'Space Grotesk', 'family' => 'Space Grotesk', 'bunny' => 'space-grotesk:400,500,600,700'],
+        'dm-sans' => ['label' => 'DM Sans', 'family' => 'DM Sans', 'bunny' => 'dm-sans:400,500,600,700'],
+        'sora' => ['label' => 'Sora', 'family' => 'Sora', 'bunny' => 'sora:400,500,600,700'],
     ],
 
 ];

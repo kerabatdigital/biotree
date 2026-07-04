@@ -6,6 +6,7 @@
     $socials = $links->where('type', 'social');
     $items = $links->whereIn('type', ['link', 'header', 'embed']);
     $avatarUrl = $profile->avatar_path ? asset('storage/'.$profile->avatar_path) : null;
+    $fontDef = config('biotree.fonts')[$theme['font']] ?? config('biotree.fonts')['figtree'];
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
@@ -25,10 +26,8 @@
     <meta property="og:url" content="{{ url('/'.$profile->username) }}">
     @if ($avatarUrl)
         <meta property="og:image" content="{{ $avatarUrl }}">
-        <meta name="twitter:card" content="summary">
-    @else
-        <meta name="twitter:card" content="summary">
     @endif
+    <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="{{ $displayName }}">
     <meta name="twitter:description" content="{{ \Illuminate\Support\Str::limit($description, 160) }}">
 
@@ -43,7 +42,7 @@
     </script>
 
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800" rel="stylesheet">
+    <link href="https://fonts.bunny.net/css?family={{ $fontDef['bunny'] }}" rel="stylesheet">
 
     <style>
         :root {
@@ -53,13 +52,14 @@
             --muted: {{ $theme['muted'] }};
             --btn-bg: {{ $theme['button_bg'] }};
             --btn-text: {{ $theme['button_text'] }};
+            --btn-border: {{ $theme['button_border'] }};
             --btn-radius: {{ $theme['button_radius'] }};
             --accent: {{ $theme['accent'] }};
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html { -webkit-text-size-adjust: 100%; }
         body {
-            font-family: 'Figtree', ui-sans-serif, system-ui, -apple-system, sans-serif;
+            font-family: '{{ $fontDef['family'] }}', ui-sans-serif, system-ui, -apple-system, sans-serif;
             background: linear-gradient(180deg, var(--bg), var(--bg-end)) fixed;
             color: var(--text);
             min-height: 100vh;
@@ -90,7 +90,7 @@
             background: var(--btn-bg); color: var(--btn-text);
             border-radius: var(--btn-radius); text-decoration: none; font-weight: 600;
             transition: transform .12s ease, filter .12s ease;
-            border: 1px solid rgba(255,255,255,.06);
+            border: 1px solid var(--btn-border);
         }
         .btn:hover { transform: translateY(-2px); filter: brightness(1.08); }
         .btn .label { flex: 1; text-align: center; }
@@ -100,7 +100,7 @@
         .footer a {
             display: inline-flex; align-items: center; gap: 6px;
             color: var(--muted); text-decoration: none; font-size: 13px; font-weight: 600;
-            padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,.08);
+            padding: 8px 14px; border-radius: 999px; border: 1px solid var(--btn-border);
         }
         .footer a:hover { color: var(--text); }
     </style>

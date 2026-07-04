@@ -5,6 +5,7 @@ use App\Http\Controllers\OutboundClickController;
 use App\Http\Controllers\PublicProfileController;
 use App\Http\Controllers\TrackController;
 use App\Http\Middleware\EnsureOnboarded;
+use App\Livewire\App\AppearanceEditor;
 use App\Livewire\App\LinkEditor;
 use App\Livewire\Onboarding\ClaimUsername;
 use Illuminate\Support\Facades\Route;
@@ -24,6 +25,7 @@ Route::get('onboarding', ClaimUsername::class)
 Route::middleware(['auth', 'verified', EnsureOnboarded::class])->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
     Route::get('links', LinkEditor::class)->name('links');
+    Route::get('appearance', AppearanceEditor::class)->name('appearance');
 });
 
 Route::view('profile', 'profile')
