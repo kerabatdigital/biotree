@@ -18,7 +18,7 @@ return [
         'me', 'home', 'explore', 'discover', 'search', 'signup', 'sign-up', 'signin',
         'sign-in', 'password', 'verify', 'biotree', 'root', 'system', 'static',
         'assets', 'img', 'images', 'css', 'js', 'fonts', 'storage', 'public', 'null',
-        'undefined', 'test', 'demo',
+        'undefined', 'test', 'demo', 'track', 'up',
     ],
 
     'username' => [
@@ -48,6 +48,25 @@ return [
             'file-pdf', 'coffee', 'heart', 'star', 'gift', 'ticket', 'briefcase',
             'graduation-cap', 'newspaper', 'microphone', 'headphones', 'house', 'user-circle',
         ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Default public-page theme
+    |--------------------------------------------------------------------------
+    | Merged under each profile's saved `theme` JSON (Phase 4 lets users edit it).
+    */
+    'default_theme' => [
+        'preset' => 'midnight',
+        'bg' => '#0a0a0a',
+        'bg_end' => '#18181b',
+        'text' => '#ffffff',
+        'muted' => '#a1a1aa',
+        'button_bg' => 'rgba(255,255,255,0.08)',
+        'button_text' => '#ffffff',
+        'button_radius' => '16px',
+        'accent' => '#34d399',
+        'avatar_shape' => 'circle',
     ],
 
 ];

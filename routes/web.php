@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\OutboundClickController;
+use App\Http\Controllers\PublicProfileController;
+use App\Http\Controllers\TrackController;
 use App\Http\Middleware\EnsureOnboarded;
 use App\Livewire\App\LinkEditor;
 use App\Livewire\Onboarding\ClaimUsername;
@@ -27,4 +30,16 @@ Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
 
+// Click tracking → outbound redirect (public). Link resolved by ULID.
+Route::get('out/{link}', OutboundClickController::class)->name('link.out');
+
+// Page-view beacon (CSRF-exempt — see bootstrap/app.php).
+Route::post('track/view', [TrackController::class, 'view'])->name('track.view');
+
 require __DIR__.'/auth.php';
+
+// Public profile page — catch-all, MUST remain the last route so every
+// named/app route above takes precedence. Reserved usernames can't be claimed.
+Route::get('{username}', [PublicProfileController::class, 'show'])
+    ->where('username', '[A-Za-z0-9_]+')
+    ->name('profile.show');

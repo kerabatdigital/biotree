@@ -44,6 +44,14 @@ class Profile extends Model
     }
 
     /**
+     * The profile's saved theme merged over the app defaults.
+     */
+    public function effectiveTheme(): array
+    {
+        return array_merge(config('biotree.default_theme', []), $this->theme ?? []);
+    }
+
+    /**
      * Public pages are resolved by username: biotree.my/{username}
      */
     public function getRouteKeyName(): string
