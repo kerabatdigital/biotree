@@ -7,10 +7,13 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password'])]
+// Note: role/status/plan are intentionally NOT mass-assignable (DB defaults only)
+// so a user can never escalate their own privileges via mass assignment.
+#[Fillable(['name', 'email', 'password', 'google_id', 'avatar', 'locale', 'last_login_at'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -26,7 +29,34 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'last_login_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * The user's public BioTree page (biotree.my/{username}).
+     */
+    public function profile(): HasOne
+    {
+        return $this->hasOne(Profile::class);
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isSuspended(): bool
+    {
+        return $this->status === 'suspended';
+    }
+
+    /**
+     * Whether the user has finished onboarding (claimed a username).
+     */
+    public function hasCompletedOnboarding(): bool
+    {
+        return $this->profile()->exists();
     }
 }

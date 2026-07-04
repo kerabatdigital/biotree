@@ -85,4 +85,6 @@ new #[Layout('layouts.guest')] class extends Component
             </x-primary-button>
         </div>
     </form>
+
+    <x-auth.google />
 </div>
