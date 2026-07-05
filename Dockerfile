@@ -36,51 +36,33 @@ RUN npm run build
 # ─────────────────────────────────────────────
 FROM php:8.3-fpm-alpine
 
-# Install system dependencies
+# Runtime system dependencies (shared libraries the app needs at runtime).
+# Build-time -dev packages are handled by install-php-extensions below.
 RUN apk add --no-cache \
     bash \
     curl \
     git \
-    libzip \
-    oniguruma \
-    oniguruma-dev \
-    libzip-dev \
-    icu-dev \
-    libpq-dev \
     librsvg \
-    redis \
     supervisor \
     fcgi \
     openssl \
     openssh-client
 
-# PHP extensions
-RUN docker-php-ext-install \
-    pdo \
+# PHP extensions — installed via mlocati/docker-php-extension-installer.
+# It pulls extension sources from GitHub releases and auto-manages build deps,
+# permanently avoiding the flaky/deprecated pecl.php.net channel that caused
+# builds to fail with "No releases available for package pecl.php.net/redis".
+ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+RUN chmod +x /usr/local/bin/install-php-extensions \
+ && install-php-extensions \
     pdo_mysql \
     mbstring \
     intl \
     zip \
     bcmath \
     opcache \
-    pcntl
-
-# Build dependencies for PECL extensions
-RUN apk add --no-cache --virtual .build-deps \
-    autoconf \
-    gcc \
-    g++ \
-    make \
-    musl-dev
-
-# Redis extension — refresh the pecl channel first, otherwise the base image's
-# stale channel cache can fail with "No releases available for package .../redis".
-RUN pecl channel-update pecl.php.net \
- && pecl install redis \
- && docker-php-ext-enable redis
-
-# Remove build dependencies
-RUN apk del .build-deps
+    pcntl \
+    redis
 
 # Install Composer
 COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
