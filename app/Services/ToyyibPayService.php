@@ -10,10 +10,12 @@ class ToyyibPayService
     private string $secretKey;
     private string $categoryCode;
 
+    private string $host;
+
     public function __construct()
     {
-        $env = config('app.env') === 'production' ? 'toyyibpay.com' : 'dev.toyyibpay.com';
-        $this->baseUrl = "https://{$env}/index.php/api/";
+        $this->host = config('services.toyyibpay.production') ? 'toyyibpay.com' : 'dev.toyyibpay.com';
+        $this->baseUrl = "https://{$this->host}/index.php/api/";
         $this->secretKey = config('services.toyyibpay.secret_key') ?? '';
         $this->categoryCode = config('services.toyyibpay.category_code') ?? '';
     }
@@ -23,8 +25,16 @@ class ToyyibPayService
      * Amount should be in cents (100 = RM 1.00).
      * Returns bill_code or throws exception on failure.
      */
-    public function createBill(int $amountCents, string $externalReference, string $description, string $returnUrl, string $callbackUrl): string
-    {
+    public function createBill(
+        int $amountCents,
+        string $externalReference,
+        string $description,
+        string $returnUrl,
+        string $callbackUrl,
+        string $payorName,
+        string $payorEmail,
+        string $payorPhone = '0000000000',
+    ): string {
         $response = Http::asForm()->post("{$this->baseUrl}createBill", [
             'userSecretKey' => $this->secretKey,
             'categoryCode' => $this->categoryCode,
@@ -37,35 +47,47 @@ class ToyyibPayService
             'billReturnUrl' => $returnUrl,
             'billCallbackUrl' => $callbackUrl,
             'billContentEmail' => 'no', // Don't email invoice
+            'billTo' => $payorName,
+            'billEmail' => $payorEmail,
+            'billPhone' => $payorPhone,
         ]);
 
         $result = $response->json();
 
-        if (! isset($result['BillCode'])) {
-            throw new \Exception('Failed to create ToyyibPay bill: ' . ($result['Message'] ?? 'Unknown error'));
+        // Success responses are wrapped in a JSON array: [{"BillCode": "..."}].
+        // Error responses are either a JSON object with a Message, or a bare string
+        // like "[CATEGORY-NOT-MATCH]".
+        $billCode = $result[0]['BillCode'] ?? null;
+
+        if (! $billCode) {
+            $message = is_array($result) ? ($result['msg'] ?? $result['Message'] ?? null) : $response->body();
+            throw new \Exception('Failed to create ToyyibPay bill: ' . ($message ?? 'Unknown error'));
         }
 
-        return $result['BillCode'];
+        return $billCode;
     }
 
     /**
      * Get bill transactions to verify payment was made.
-     * Returns array of transaction details or throws exception.
+     * Success is a bare JSON array of transaction objects. An unpaid/unknown bill
+     * returns the plain-text body "No data found!" (not JSON) — that's a normal
+     * "nothing yet" result, not an error, so it resolves to an empty array.
      */
-    public function getBillTransactions(string $billCode): array
+    public function getBillTransactions(string $billCode, ?int $paymentStatus = null): array
     {
-        $response = Http::asForm()->post("{$this->baseUrl}getBillTransactions", [
+        $response = Http::asForm()->post("{$this->baseUrl}getBillTransactions", array_filter([
             'userSecretKey' => $this->secretKey,
             'billCode' => $billCode,
-        ]);
+            'billpaymentStatus' => $paymentStatus,
+        ], fn ($v) => $v !== null));
 
         $result = $response->json();
 
-        if (! isset($result['bills'])) {
-            throw new \Exception('Failed to fetch bill transactions: ' . ($result['Message'] ?? 'Unknown error'));
+        if (! is_array($result) || array_is_list($result) === false) {
+            return [];
         }
 
-        return $result['bills'] ?? [];
+        return $result;
     }
 
     /**
@@ -83,7 +105,6 @@ class ToyyibPayService
      */
     public function getCheckoutUrl(string $billCode): string
     {
-        $host = config('app.env') === 'production' ? 'toyyibpay.com' : 'dev.toyyibpay.com';
-        return "https://{$host}/{$billCode}";
+        return "https://{$this->host}/{$billCode}";
     }
 }

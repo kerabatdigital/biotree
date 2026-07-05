@@ -17,6 +17,8 @@ interface PaymentGateway
         string $description,
         string $returnUrl,
         string $callbackUrl,
+        string $payorName,
+        string $payorEmail,
     ): array;
 
     /**

@@ -50,9 +50,13 @@ class BillingUpgrade extends Component
 
     public function render()
     {
+        $subscription = auth()->user()->subscription;
+
         return view('livewire.app.billing-upgrade', [
             'plans' => Plan::active()->get(),
-            'currentSubscription' => auth()->user()->subscription,
+            // Only surface a subscription that's actually in force — pending (abandoned
+            // checkout) or expired/cancelled rows shouldn't read as "your current plan".
+            'currentSubscription' => $subscription?->status === 'active' ? $subscription : null,
         ]);
     }
 }

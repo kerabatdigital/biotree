@@ -101,6 +101,8 @@ class BillingController extends Controller
                 description: "{$plan->name} ({$billingPeriod})",
                 returnUrl: route('billing.return'),
                 callbackUrl: route('billing.callback'),
+                payorName: $user->name,
+                payorEmail: $user->email,
             );
 
             // Persist the gateway's bill reference so we can re-verify the transaction later.

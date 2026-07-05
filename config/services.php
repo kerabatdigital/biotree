@@ -44,6 +44,9 @@ return [
     'toyyibpay' => [
         'secret_key' => env('TOYYIBPAY_SECRET_KEY'),
         'category_code' => env('TOYYIBPAY_CATEGORY_CODE'),
+        // When true, use the live host (toyyibpay.com) regardless of APP_ENV.
+        // Lets us test against production locally. Defaults to APP_ENV=production.
+        'production' => env('TOYYIBPAY_PRODUCTION', env('APP_ENV') === 'production'),
     ],
 
 ];

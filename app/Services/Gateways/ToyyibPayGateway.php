@@ -15,6 +15,8 @@ class ToyyibPayGateway implements PaymentGateway
         string $description,
         string $returnUrl,
         string $callbackUrl,
+        string $payorName,
+        string $payorEmail,
     ): array {
         $billCode = $this->toyyibpay->createBill(
             amountCents: $amountCents,
@@ -22,6 +24,8 @@ class ToyyibPayGateway implements PaymentGateway
             description: $description,
             returnUrl: $returnUrl,
             callbackUrl: $callbackUrl,
+            payorName: $payorName,
+            payorEmail: $payorEmail,
         );
 
         return [
@@ -47,11 +51,11 @@ class ToyyibPayGateway implements PaymentGateway
     public function getTransaction(string $transactionId): ?array
     {
         try {
-            $transactions = $this->toyyibpay->getBillTransactions($transactionId);
+            // billpaymentStatus=1 filters server-side to successful transactions only.
+            $transactions = $this->toyyibpay->getBillTransactions($transactionId, paymentStatus: 1);
 
-            // Return the first successful transaction, or null if none found
             foreach ($transactions as $txn) {
-                if (($txn['billpaymentStatus'] ?? null) === 'completed') {
+                if (($txn['billpaymentStatus'] ?? null) === '1') {
                     return $txn;
                 }
             }

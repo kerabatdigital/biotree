@@ -12,6 +12,8 @@ class ChipGateway implements PaymentGateway
         string $description,
         string $returnUrl,
         string $callbackUrl,
+        string $payorName,
+        string $payorEmail,
     ): array {
         throw new \Exception('CHIP gateway not yet implemented');
     }

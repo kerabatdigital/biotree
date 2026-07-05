@@ -52,7 +52,10 @@ class User extends Authenticatable
 
     public function subscription(): HasOne
     {
-        return $this->hasOne(Subscription::class);
+        // A user can accumulate multiple Subscription rows over time (one per checkout
+        // attempt, including abandoned/failed ones), so always resolve to the most
+        // recently created row rather than an arbitrary one.
+        return $this->hasOne(Subscription::class)->latestOfMany();
     }
 
     public function isAdmin(): bool
