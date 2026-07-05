@@ -65,8 +65,19 @@ RUN docker-php-ext-install \
     opcache \
     pcntl
 
+# Build dependencies for PECL extensions
+RUN apk add --no-cache --virtual .build-deps \
+    autoconf \
+    gcc \
+    g++ \
+    make \
+    musl-dev
+
 # Redis extension
 RUN pecl install redis && docker-php-ext-enable redis
+
+# Remove build dependencies
+RUN apk del .build-deps
 
 # Install Composer
 COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
