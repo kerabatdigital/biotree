@@ -103,8 +103,13 @@
 ### `profile_daily_stats` / `link_daily_stats` (rollups)
 `profile_id|link_id, date, views, unique_visitors, clicks` — populated by scheduled job; dashboards read these for speed.
 
-### `reports` (abuse moderation — important for a public link platform)
-`id, reportable_type, reportable_id, reporter_email (nullable), reason, status (enum: open|reviewed|actioned|dismissed), notes, timestamps`
+### `reports` (abuse moderation — ✅ IMPLEMENTED)
+`id, reportable_type, reportable_id, reporter_email (nullable), reason, description (nullable), status (enum: open|reviewed|actioned|dismissed), admin_notes, handled_by (nullable FK), handled_at, timestamps`
+- MorphTo relationship to Profile, Link, or User
+- Auto-actions: unpublish profile / disable link / suspend user when actioned
+
+### `audit_logs` (admin action tracking — ✅ IMPLEMENTED)
+`id, admin_id (FK), action (string), target_type, target_id, old_values (JSON), new_values (JSON), ip_address, user_agent, created_at`
 
 ### `plans` *(placeholder for later billing)*
 `id, name, price_cents, currency (MYR), interval, features (JSON), is_active` — Cashier/subscriptions added in the billing phase.
@@ -117,27 +122,99 @@
 
 ```
 app/
-  Livewire/
-    App/        Dashboard, LinkEditor, Appearance, Analytics, Settings
-    Admin/      Users, UserDetail, Reports, Overview, Settings
-    Auth/       (Breeze components)
-    Public/     BioPage (SSR wrapper), embeds
-  Models/       User, Profile, Link, PageView, LinkClick, Report, ...
-  Services/     ThemeService, AnalyticsService, FeatureGate, GeoIp, UsernameGuard
-  Jobs/         RecordPageView, RecordLinkClick, RollupDailyStats, GenerateOgImage
-  Observers/    ProfileObserver, LinkObserver (bust response cache on change)
   Http/
-    Controllers/ OutboundClickController, TrackController, SitemapController, Auth/GoogleController
-    Middleware/  SetLocale, EnsureAdmin, ClaimedUsername
+    Controllers/
+      Auth/
+        GoogleController.php
+      OutboundClickController.php
+      PublicProfileController.php
+      SitemapController.php
+      TrackController.php
+    Middleware/
+      EnsureAdmin.php          # Admin route protection
+      EnsureOnboarded.php      # Onboarding flow protection
+  Jobs/
+    RecordLinkClick.php
+    RecordLinkClick.php
+  Livewire/
+    App/
+      Analytics.php            # User analytics dashboard
+      AppearanceEditor.php     # Theme customizer
+      LinkEditor.php           # Link CRUD with drag-reorder
+    Admin/                     # ✅ Phase 7 - Admin Panel
+      Overview.php             # Platform KPIs & growth
+      Users.php                # User management
+      UserDetail.php           # Single user view
+      Reports.php              # Moderation queue
+      Settings.php             # Feature flags & config
+    Auth/                      # (Breeze Volt components)
+    Forms/
+    Onboarding/
+      ClaimUsername.php        # Username claim flow
+    Actions/
+      Logout.php
+  Models/
+    User.php
+    Profile.php
+    Link.php
+    LinkClick.php
+    PageView.php
+    Report.php                 # ✅ Abuse moderation
+    AuditLog.php               # ✅ Admin action tracking
+  Providers/
+  Rules/
+    NotReservedUsername.php
+  Support/
+    ThemeBuilder.php
+    Visitor.php
+  View/
+bootstrap/app.php
+config/
+  app.php
+  biotree.php                  # BioTree-specific config
+  database.php
+  services.php
+database/
+  migrations/
+  factories/
+  seeders/
 resources/
+  css/
+    app.css
+  js/
+    app.js
+  pwa/
+    icon.svg
+    og.svg
   views/
-    public/   bio page + partials (skeleton, link card, socials)
-    app/      dashboard shell + panels
-    admin/    admin shell + panels
-    layouts/  guest, app, admin
-  css/ js/    Tailwind, Alpine, service worker, ApexCharts init
-lang/         en/, ms/
-routes/       web.php, api.php (track beacon), console.php (schedule)
+    layouts/
+      admin.blade.php          # ✅ Admin layout with sidebar
+      app.blade.php
+      guest.blade.php
+    livewire/
+      admin/                   # ✅ Admin views
+        overview.blade.php
+        users.blade.php
+        user-detail.blade.php
+        reports.blade.php
+        settings.blade.php
+      app/                    # User dashboard views
+      layout/
+        navigation.blade.php   # Updated with admin link
+    public/
+    partials/
+routes/
+  web.php                      # Includes admin routes
+  auth.php
+  console.php
+compose.yaml                   # Laravel Sail (local dev)
+.github/
+  workflows/
+    deploy.yml                 # ✅ GitHub Actions CI/CD
+.env                            # Local dev secrets
+DEPLOY.md                       # Production deployment guide
+PLAN.md                         # This file
+CHANGELOG.md                    # Version history
 ```
 
 ---
@@ -177,7 +254,14 @@ routes/       web.php, api.php (track beacon), console.php (schedule)
 
 **PWA** — Manifest + Workbox service worker (installable dashboard, offline shell, cached assets), maskable icons, install prompt.
 
-**Custom Livewire admin** — Overview (platform KPIs, growth charts), Users (search/filter, suspend/restore, impersonate, reset), Reports/moderation queue, per-profile takedown, global settings (feature flags, reserved words), audit log. Guarded by `EnsureAdmin` + `role = admin`.
+**Custom Livewire admin** — ✅ **IMPLEMENTED** in Phase 7
+  - Overview: platform KPIs, user growth charts, recent signups, top profiles by clicks
+  - Users: search/filter (name, email, username), filter by status/plan/role, suspend/restore, promote/demote admin
+  - UserDetail: full user view with links, activity history, bulk actions (suspend, restore, publish, admin)
+  - Reports: moderation queue with dismiss/action/review, morphTo for Profile/Link/User reporting
+  - Settings: site config, feature flags (maintenance, signups, Google login, analytics), reserved usernames CRUD
+  - AuditLog: tracks all admin actions with before/after values, admin ID, IP, user agent
+  - Guarded by `EnsureAdmin` middleware + `role = admin` check
 
 **Settings & PDPA** — Profile/account, change email/password, connected accounts, **data export** (JSON) and **account+data deletion**, cookie consent, privacy policy.
 
@@ -230,18 +314,18 @@ routes/       web.php, api.php (track beacon), console.php (schedule)
 
 ## 13. Build Roadmap
 
-| Phase | Deliverable |
-|---|---|
-| **0 — Setup** | Laravel 12 + Livewire 3 + Tailwind v4 + Phosphor + Breeze + Socialite + Redis + base layouts, `.env`, deploy skeleton |
-| **1 — Auth** | Email + Google login, username claim onboarding, reserved-word guard |
-| **2 — Links** | Link editor: CRUD, drag-reorder, types, icon picker, live preview |
-| **3 — Public page** | SSR bio page, responsive + skeleton, base themes, click/view tracking pipeline |
-| **4 — Appearance** | Theme customizer (colors, buttons, fonts, backgrounds) + cache busting |
-| **5 — Analytics** | Event capture → rollups → dashboard charts |
-| **6 — Perf/SEO/PWA** | Octane, responsecache, Cloudflare, OG images, sitemap, PWA |
-| **7 — Admin** | Custom Livewire admin: users, reports/moderation, platform analytics, settings |
-| **8 — i18n & PDPA** | en/ms, privacy, data export/delete, cookie consent, polish |
-| **9 — Billing (later)** | Free→Pro plans, FPX/Stripe, SST, e-invoice, custom domains |
+| Phase | Status | Deliverable |
+|-------|--------|-------------|
+| **0 — Setup** | ✅ Complete | Laravel 13 + Livewire 3 + Tailwind v3 + Phosphor + Breeze + Socialite + Redis + base layouts, `.env`, deploy skeleton |
+| **1 — Auth** | ✅ Complete | Email + Google login, username claim onboarding, reserved-word guard |
+| **2 — Links** | ✅ Complete | Link editor: CRUD, drag-reorder, types, icon picker, live preview |
+| **3 — Public page** | ✅ Complete | SSR bio page, responsive + skeleton, base themes, click/view tracking pipeline |
+| **4 — Appearance** | ✅ Complete | Theme customizer (colors, buttons, fonts, backgrounds) + cache busting |
+| **5 — Analytics** | ✅ Complete | Event capture → rollups → dashboard charts |
+| **6 — Perf/SEO/PWA** | ✅ Complete | Octane, responsecache, Cloudflare, OG images, sitemap, PWA |
+| **7 — Admin** | ✅ Complete | Custom Livewire admin: users, reports/moderation, platform analytics, settings, audit logs |
+| **8 — i18n & PDPA** | 🔲 Pending | en/ms, privacy policy, terms, data export/delete, cookie consent |
+| **9 — Billing (later)** | 🔲 Future | Free→Pro plans, FPX/Stripe, SST, e-invoice, custom domains |
 
 ---
 
