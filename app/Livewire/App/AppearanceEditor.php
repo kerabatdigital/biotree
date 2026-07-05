@@ -20,6 +20,7 @@ class AppearanceEditor extends Component
     public string $tagline = '';
     public string $bio = '';
     public $avatar = null;
+    public string $custom_css = '';
 
     // Theme
     public string $preset = 'custom';
@@ -42,6 +43,7 @@ class AppearanceEditor extends Component
         $this->display_name = $profile->display_name ?? '';
         $this->tagline = $profile->tagline ?? '';
         $this->bio = $profile->bio ?? '';
+        $this->custom_css = $profile->custom_css ?? '';
 
         foreach (['preset', 'bg', 'bg_end', 'text', 'accent', 'button_style', 'button_radius', 'avatar_shape', 'font', 'bg_animation', 'link_animation'] as $key) {
             $this->{$key} = (string) ($theme[$key] ?? '');
@@ -101,6 +103,7 @@ class AppearanceEditor extends Component
         $profile->display_name = $this->display_name ?: null;
         $profile->tagline = $this->tagline ?: null;
         $profile->bio = $this->bio ?: null;
+        $profile->custom_css = $this->custom_css ?: null;
         $profile->theme = $this->themeInputs();
         $profile->save();
 
@@ -115,6 +118,7 @@ class AppearanceEditor extends Component
             'tagline' => ['nullable', 'string', 'max:120'],
             'bio' => ['nullable', 'string', 'max:500'],
             'avatar' => ['nullable', 'image', 'max:2048'],
+            'custom_css' => ['nullable', 'string', 'max:5000'],
             'bg' => ['required', 'string', 'max:32'],
             'bg_end' => ['required', 'string', 'max:32'],
             'text' => ['required', 'string', 'max:32'],

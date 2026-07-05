@@ -18,13 +18,20 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
 
         // Page-view beacon is public and sent via navigator.sendBeacon (no CSRF token).
+        // ToyyibPay callback is a webhook from external servers (no CSRF token).
         $middleware->validateCsrfTokens(except: [
             'track/*',
+            'billing/callback',
         ]);
 
         // Admin middleware alias
         $middleware->alias([
             'admin' => EnsureAdmin::class,
+        ]);
+
+        // Required for Auth::logoutOtherDevices() to actually invalidate other sessions.
+        $middleware->web(append: [
+            \Illuminate\Session\Middleware\AuthenticateSession::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

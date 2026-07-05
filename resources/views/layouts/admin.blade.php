@@ -27,7 +27,7 @@
                     {{-- Logo --}}
                     <div class="flex items-center justify-center h-16 px-4 border-b border-gray-200 dark:border-gray-700">
                         <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2">
-                            <x-phosphor-tree-logo class="w-8 h-8 text-emerald-600" weight="duotone" />
+                            <x-phosphor-tree-duotone class="w-8 h-8 text-emerald-600" />
                             <span class="text-lg font-semibold text-gray-900 dark:text-white">BioTree</span>
                             <span class="px-2 py-0.5 text-xs font-medium bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 rounded">Admin</span>
                         </a>
@@ -64,6 +64,28 @@
                             @if($openReports > 0)
                                 <span class="ml-auto px-2 py-0.5 text-xs font-medium bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded-full">{{ $openReports }}</span>
                             @endif
+                        </a>
+
+                        <p class="px-3 pt-4 pb-2 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Billing</p>
+                        <a href="{{ route('admin.billing.plans') }}"
+                           class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors
+                                  {{ request()->routeIs('admin.billing.plans') ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                            <x-phosphor-list class="w-5 h-5" />
+                            Plans
+                        </a>
+
+                        <a href="{{ route('admin.billing.subscriptions') }}"
+                           class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors
+                                  {{ request()->routeIs('admin.billing.subscriptions') ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                            <x-phosphor-certificate class="w-5 h-5" />
+                            Subscriptions
+                        </a>
+
+                        <a href="{{ route('admin.billing.coupons') }}"
+                           class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors
+                                  {{ request()->routeIs('admin.billing.coupons') ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                            <x-phosphor-ticket class="w-5 h-5" />
+                            Coupons
                         </a>
 
                         <a href="{{ route('admin.settings') }}"

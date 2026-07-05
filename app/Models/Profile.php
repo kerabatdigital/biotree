@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use App\Support\ThemeBuilder;
 
 class Profile extends Model
@@ -21,11 +22,17 @@ class Profile extends Model
         'avatar_path',
         'theme',
         'is_verified',
+        'is_published',
+        'custom_css',
+        'seo_title',
+        'seo_description',
+        'og_image_path',
     ];
 
     protected $casts = [
         'theme' => 'array',
         'is_verified' => 'boolean',
+        'is_published' => 'boolean',
     ];
 
     public function user(): BelongsTo
@@ -35,7 +42,7 @@ class Profile extends Model
 
     public function links(): HasMany
     {
-        return $this->hasMany(Link::class)->orderBy('position');
+        return $this->hasMany(Link::class);
     }
 
     public function reports(): MorphTo

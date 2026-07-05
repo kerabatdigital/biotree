@@ -8,6 +8,8 @@ use App\Models\PageView;
 use App\Models\Profile;
 use App\Models\Report;
 use App\Models\User;
+use App\Notifications\AccountRestoredNotification;
+use App\Notifications\AccountSuspendedNotification;
 use Livewire\Component;
 
 class UserDetail extends Component
@@ -137,6 +139,7 @@ class UserDetail extends Component
                 $oldValues = ['status' => $this->user->status];
                 $this->user->update(['status' => 'suspended']);
                 AuditLog::log($adminId, 'suspend_user', $this->user, $oldValues, ['status' => 'suspended'], request()->ip());
+                $this->user->notify(new AccountSuspendedNotification);
                 session()->flash('message', 'User suspended successfully.');
                 break;
 
@@ -144,6 +147,7 @@ class UserDetail extends Component
                 $oldValues = ['status' => $this->user->status];
                 $this->user->update(['status' => 'active']);
                 AuditLog::log($adminId, 'restore_user', $this->user, $oldValues, ['status' => 'active'], request()->ip());
+                $this->user->notify(new AccountRestoredNotification);
                 session()->flash('message', 'User restored successfully.');
                 break;
 

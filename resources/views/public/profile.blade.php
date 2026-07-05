@@ -1,5 +1,5 @@
 @php
-    $theme = $profile->effectiveTheme();
+    $theme = $profile->publicTheme();
     $avatarRadius = ['circle' => '50%', 'rounded' => '22px', 'square' => '10px'][$theme['avatar_shape'] ?? 'circle'] ?? '50%';
     $displayName = $profile->display_name ?: '@'.$profile->username;
     $description = $profile->seo_description ?: ($profile->tagline ?: $profile->bio ?: 'My links on BioTree');
@@ -102,6 +102,9 @@
         }
         .footer a:hover { color: var(--text); }
     </style>
+    @if ($profile->custom_css)
+        <style>{!! $profile->custom_css !!}</style>
+    @endif
 </head>
 <body>
     <main class="wrap">

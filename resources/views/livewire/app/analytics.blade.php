@@ -43,6 +43,30 @@
             @endforeach
         </div>
 
+        {{-- share / qr --}}
+        <div class="mt-6 flex flex-wrap items-center gap-6 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-800">
+            <img src="{{ $qrUrl }}" alt="QR code for {{ $publicUrl }}" class="h-28 w-28 shrink-0 rounded-lg border border-gray-100 dark:border-gray-700">
+            <div class="min-w-0 flex-1">
+                <p class="text-sm font-semibold uppercase tracking-wide text-gray-500">Share your page</p>
+                <div x-data="{ copied: false }" class="mt-2 flex flex-wrap items-center gap-2">
+                    <input type="text" readonly value="{{ $publicUrl }}"
+                           class="w-full max-w-xs rounded-md border-gray-300 text-sm text-gray-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 sm:w-auto"
+                           x-ref="publicUrl" onclick="this.select()">
+                    <button type="button"
+                            @click="navigator.clipboard.writeText($refs.publicUrl.value); copied = true; setTimeout(() => copied = false, 1500)"
+                            class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-700">
+                        <x-phosphor-copy class="h-4 w-4" />
+                        <span x-text="copied ? 'Copied!' : 'Copy link'"></span>
+                    </button>
+                    <a href="{{ $qrDownloadUrl }}" download
+                       class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-700">
+                        <x-phosphor-download-simple class="h-4 w-4" />
+                        Download QR
+                    </a>
+                </div>
+            </div>
+        </div>
+
         {{-- chart --}}
         <div class="mt-6 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-800">
             <div class="flex items-center justify-between">

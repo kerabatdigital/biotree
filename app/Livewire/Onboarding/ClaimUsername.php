@@ -3,6 +3,7 @@
 namespace App\Livewire\Onboarding;
 
 use App\Models\Profile;
+use App\Notifications\WelcomeNotification;
 use App\Rules\NotReservedUsername;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -69,6 +70,8 @@ class ClaimUsername extends Component
             'display_name' => $data['display_name'],
             'is_published' => true,
         ]);
+
+        auth()->user()->notify(new WelcomeNotification);
 
         $this->redirectRoute('dashboard', navigate: true);
     }

@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "biotree",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [".claude/preview-proxy.cjs"],
+      "port": 9191,
+      "autoPort": true
+    }
+  ]
+}

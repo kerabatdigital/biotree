@@ -26,6 +26,10 @@ class LinkEditor extends Component
 
     public ?string $icon = null;
 
+    public ?string $start_at = null;
+
+    public ?string $end_at = null;
+
     protected function profile(): Profile
     {
         return auth()->user()->profile;
@@ -46,6 +50,8 @@ class LinkEditor extends Component
                 Rule::requiredIf(fn () => in_array($this->type, ['link', 'social'], true)),
                 'nullable', 'url:http,https', 'max:2048',
             ],
+            'start_at' => ['nullable', 'date'],
+            'end_at' => ['nullable', 'date', 'after:start_at'],
         ];
     }
 
@@ -60,6 +66,15 @@ class LinkEditor extends Component
 
     public function newLink(string $type = 'link'): void
     {
+        $user = auth()->user();
+        $linkCount = $this->profile()->links()->count();
+
+        // Enforce free plan limit
+        if (! $user->isPro() && $linkCount >= 5) {
+            $this->addError('links', 'Free plan is limited to 5 links. Upgrade to Pro for unlimited.');
+            return;
+        }
+
         $this->resetForm();
         $this->type = in_array($type, Link::TYPES, true) ? $type : 'link';
         $this->showForm = true;
@@ -74,6 +89,8 @@ class LinkEditor extends Component
         $this->title = (string) $link->title;
         $this->url = (string) $link->url;
         $this->icon = $link->icon;
+        $this->start_at = $link->start_at?->format('Y-m-d\TH:i');
+        $this->end_at = $link->end_at?->format('Y-m-d\TH:i');
         $this->showForm = true;
     }
 
@@ -137,7 +154,7 @@ class LinkEditor extends Component
 
     protected function resetForm(): void
     {
-        $this->reset(['editingId', 'showForm', 'type', 'title', 'url', 'icon']);
+        $this->reset(['editingId', 'showForm', 'type', 'title', 'url', 'icon', 'start_at', 'end_at']);
         $this->resetValidation();
     }
 

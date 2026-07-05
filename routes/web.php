@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\BillingController;
 use App\Http\Controllers\OutboundClickController;
 use App\Http\Controllers\PublicProfileController;
 use App\Http\Controllers\SitemapController;
@@ -40,6 +41,18 @@ Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
 
+// Billing routes — protected by auth + verified (no onboarding required)
+Route::middleware(['auth', 'verified'])->prefix('billing')->group(function () {
+    Route::get('upgrade', \App\Livewire\App\BillingUpgrade::class)->name('billing.upgrade');
+    Route::get('subscriptions', \App\Livewire\App\SubscriptionDashboard::class)->name('billing.subscriptions');
+    Route::get('checkout', [BillingController::class, 'checkout'])->name('billing.checkout');
+    Route::get('return', [BillingController::class, 'returnFromPayment'])->name('billing.return');
+    Route::get('dashboard', [BillingController::class, 'dashboard'])->name('billing.dashboard');
+});
+
+// ToyyibPay callback webhook (CSRF-exempt via bootstrap/app.php configuration)
+Route::post('billing/callback', [BillingController::class, 'callback'])->name('billing.callback');
+
 // Admin routes - protected by auth + verified + admin middleware
 Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->group(function () {
     Route::get('/', Overview::class)->name('admin.dashboard');
@@ -47,6 +60,9 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->group(functio
     Route::get('/users/{user}', UserDetail::class)->name('admin.users.show');
     Route::get('/reports', Reports::class)->name('admin.reports');
     Route::get('/settings', Settings::class)->name('admin.settings');
+    Route::get('/billing/plans', \App\Livewire\Admin\BillingPlans::class)->name('admin.billing.plans');
+    Route::get('/billing/subscriptions', \App\Livewire\Admin\BillingSubscriptions::class)->name('admin.billing.subscriptions');
+    Route::get('/billing/coupons', \App\Livewire\Admin\BillingCoupons::class)->name('admin.billing.coupons');
 });
 
 // Click tracking → outbound redirect (public). Link resolved by ULID.

@@ -23,7 +23,6 @@ return new class extends Migration
             $table->timestamp('handled_at')->nullable();
             $table->timestamps();
 
-            $table->index(['reportable_type', 'reportable_id']);
             $table->index('status');
             $table->index('reason');
         });

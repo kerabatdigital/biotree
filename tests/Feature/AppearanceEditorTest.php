@@ -69,8 +69,8 @@ class AppearanceEditorTest extends TestCase
         $this->assertSame('solid', $profile->theme['button_style']);
         $this->assertSame('poppins', $profile->theme['font']);
 
-        // effectiveTheme expands inputs into concrete render values.
-        $this->assertArrayHasKey('button_bg', $profile->effectiveTheme());
+        // publicTheme expands inputs into concrete render values.
+        $this->assertArrayHasKey('button_bg', $profile->publicTheme());
     }
 
     public function test_invalid_button_style_is_rejected(): void

@@ -159,6 +159,19 @@
                         </div>
                     </div>
                 </section>
+
+                {{-- Advanced --}}
+                <section class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-800">
+                    <h2 class="mb-1 text-sm font-semibold uppercase tracking-wide text-gray-500">Advanced</h2>
+                    <p class="mb-3 text-xs text-gray-500 dark:text-gray-400">
+                        Custom CSS applies only to your own public page. Written by you — use at your own risk.
+                    </p>
+                    <x-input-label for="custom_css" value="Custom CSS" />
+                    <textarea wire:model="custom_css" id="custom_css" rows="6"
+                              class="mt-1 block w-full rounded-md border-gray-300 font-mono text-xs shadow-sm focus:border-emerald-500 focus:ring-emerald-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                              placeholder="body { --tw-gradient-from: #000; }"></textarea>
+                    <x-input-error :messages="$errors->get('custom_css')" class="mt-1" />
+                </section>
             </div>
 
             {{-- ============================ LIVE PREVIEW ============================ --}}

@@ -6,6 +6,7 @@ use App\Models\Link;
 use App\Models\LinkClick;
 use App\Models\PageView;
 use App\Models\Profile;
+use App\Services\QrCodeService;
 use Illuminate\Support\Carbon;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -173,6 +174,8 @@ class Analytics extends Component
 
     public function render()
     {
+        $publicUrl = url($this->profile()->username);
+
         return view('livewire.app.analytics', [
             'stats' => $this->stats,
             'chart' => $this->chart,
@@ -181,6 +184,9 @@ class Analytics extends Component
             'referrers' => $this->referrers,
             'devices' => $this->devices,
             'profileUsername' => $this->profile()->username,
+            'publicUrl' => $publicUrl,
+            'qrUrl' => QrCodeService::generate($publicUrl),
+            'qrDownloadUrl' => QrCodeService::download($publicUrl),
         ]);
     }
 }

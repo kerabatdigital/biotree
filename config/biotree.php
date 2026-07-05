@@ -36,11 +36,10 @@ return [
             'telegram-logo', 'snapchat-logo', 'pinterest-logo', 'discord-logo',
             'twitch-logo', 'github-logo', 'reddit-logo', 'medium-logo',
             'behance-logo', 'dribbble-logo', 'spotify-logo', 'soundcloud-logo',
-            'mastodon-logo', 'bluesky-logo', 'tumblr-logo', 'vimeo-logo',
+            'mastodon-logo', 'butterfly', 'tumblr-logo', 'video-camera',
         ],
         'Music' => [
-            'spotify-logo', 'soundcloud-logo', 'apple-logo', 'youtube-music-logo',
-            'deezer-logo', 'bandcamp-logo', 'tidal-logo', 'music-notes',
+            'spotify-logo', 'soundcloud-logo', 'apple-logo', 'tidal-logo', 'music-notes',
         ],
         'General' => [
             'link', 'link-simple', 'globe', 'envelope-simple', 'phone', 'chat-circle',
@@ -55,7 +54,7 @@ return [
         ],
         'Creative' => [
             'pencil', 'paint-brush', 'camera', 'image', 'film-strip', 'palette',
-            'brush', 'pen-nib', 'scissors', 'hammer', 'wrench',
+            'pen-nib', 'scissors', 'hammer', 'wrench',
         ],
     ],
 

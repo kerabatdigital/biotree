@@ -59,6 +59,20 @@
                                     <x-input-error :messages="$errors->get('url')" class="mt-1" />
                                 </div>
 
+                                {{-- scheduling --}}
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <x-input-label for="l-start-at" value="Show from (optional)" />
+                                        <x-text-input wire:model="start_at" id="l-start-at" type="datetime-local" class="mt-1 block w-full" />
+                                        <x-input-error :messages="$errors->get('start_at')" class="mt-1" />
+                                    </div>
+                                    <div>
+                                        <x-input-label for="l-end-at" value="Hide after (optional)" />
+                                        <x-text-input wire:model="end_at" id="l-end-at" type="datetime-local" class="mt-1 block w-full" />
+                                        <x-input-error :messages="$errors->get('end_at')" class="mt-1" />
+                                    </div>
+                                </div>
+
                                 {{-- icon picker --}}
                                 <div x-data="{ open: false, q: '' }" class="relative">
                                     <x-input-label value="Icon" />

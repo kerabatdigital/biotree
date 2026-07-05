@@ -21,6 +21,20 @@
 
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                 <div class="max-w-xl">
+                    <livewire:profile.logout-other-browser-sessions-form />
+                </div>
+            </div>
+
+            @if (auth()->user()->profile)
+                <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
+                    <div class="max-w-xl">
+                        <livewire:profile.update-profile-visibility-form />
+                    </div>
+                </div>
+            @endif
+
+            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
+                <div class="max-w-xl">
                     <livewire:profile.delete-user-form />
                 </div>
             </div>
