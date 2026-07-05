@@ -13,6 +13,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Trust the Coolify/Traefik reverse proxy so X-Forwarded-Proto is honored
+        // (otherwise Laravel generates http:// asset URLs behind an https-terminating proxy).
+        $middleware->trustProxies(at: '*');
+
         // Page-view beacon is public and sent via navigator.sendBeacon (no CSRF token).
         $middleware->validateCsrfTokens(except: [
             'track/*',
