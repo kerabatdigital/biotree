@@ -4,6 +4,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Admin allowlist
+    |--------------------------------------------------------------------------
+    | Emails listed here are always treated as admins, in addition to any user
+    | whose DB `role` column is 'admin'. Set via the ADMIN_EMAILS env var
+    | (comma-separated) so the privileged address is never hardcoded in source.
+    */
+    'admin_emails' => array_values(array_filter(array_map(
+        'trim',
+        explode(',', (string) env('ADMIN_EMAILS', ''))
+    ))),
+
+    /*
+    |--------------------------------------------------------------------------
     | Reserved usernames
     |--------------------------------------------------------------------------
     */

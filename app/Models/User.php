@@ -60,7 +60,14 @@ class User extends Authenticatable
 
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        if ($this->role === 'admin') {
+            return true;
+        }
+
+        // Config-driven allowlist (ADMIN_EMAILS env), matched case-insensitively.
+        $adminEmails = array_map('strtolower', config('biotree.admin_emails', []));
+
+        return in_array(strtolower($this->email), $adminEmails, true);
     }
 
     public function isSuspended(): bool
