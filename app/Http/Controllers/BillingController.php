@@ -126,13 +126,31 @@ class BillingController extends Controller
     }
 
     /**
-     * Return from payment gateway (browser redirect, non-authoritative).
+     * Return from payment gateway (browser redirect). The status_id/billcode query
+     * params are NOT trusted for fulfilment — they're only used to look up which
+     * local payment to re-verify via the gateway API. This exists because the
+     * server-to-server callback cannot reach a localhost dev environment (ToyyibPay's
+     * servers can't call back to your machine), so this is often the only path that
+     * completes a payment locally. In production it's a defense-in-depth backstop in
+     * case the callback is delayed or dropped.
      */
     public function returnFromPayment(Request $request)
     {
-        return view('billing.return', [
-            'message' => 'Your payment is being processed. You will be notified once confirmed.',
-        ]);
+        $orderId = $request->query('order_id');
+        $payment = $orderId ? Payment::where('external_ref', $orderId)->first() : null;
+
+        if ($payment && $payment->status === 'pending') {
+            $this->verifyAndFulfill($payment);
+            $payment->refresh();
+        }
+
+        $message = match ($payment->status ?? null) {
+            'paid' => 'Payment confirmed — your subscription is now active!',
+            'failed' => 'Payment could not be confirmed. If you completed payment, it may take a few minutes to reflect — check your subscription dashboard shortly.',
+            default => 'Your payment is being processed. You will be notified once confirmed.',
+        };
+
+        return view('billing.return', ['message' => $message]);
     }
 
     /**
@@ -160,42 +178,53 @@ class BillingController extends Controller
             return response('Payment not found', 404);
         }
 
-        $subscription = $payment->subscription;
-
         // Store callback payload for audit.
         $payment->raw_payload = $callbackData;
         $payment->save();
 
-        // Status 1 = successful, 2 = pending, 3 = failed
         if ($status === '1') {
-            try {
-                // Re-verify against the gateway using our stored bill reference (never trust
-                // the callback body alone). getBillTransactions needs the BillCode.
-                $txn = $gateway->getTransaction($payment->bill_code ?? '');
-
-                // ToyyibPay returns billpaymentAmount in RM (e.g. "6.00"); normalise to sen.
-                $paidCents = isset($txn['billpaymentAmount'])
-                    ? (int) round(((float) $txn['billpaymentAmount']) * 100)
-                    : null;
-
-                if ($txn && $paidCents === (int) $payment->amount) {
-                    $this->fulfillPayment($subscription, $payment);
-                } else {
-                    \Log::warning('Callback amount mismatch or txn not found', [
-                        'payment_id' => $payment->id,
-                        'expected_cents' => $payment->amount,
-                        'paid_cents' => $paidCents,
-                    ]);
-                }
-            } catch (\Exception $e) {
-                \Log::error('Failed to verify transaction', ['payment_id' => $payment->id, 'error' => $e->getMessage()]);
-            }
+            $this->verifyAndFulfill($payment);
         } elseif ($status === '3') {
             $payment->update(['status' => 'failed']);
-            $subscription->update(['status' => 'expired']);
+            $payment->subscription->update(['status' => 'expired']);
         }
 
         return response('OK', 200);
+    }
+
+    /**
+     * Re-verify a pending payment against the gateway API (never trust caller-supplied
+     * status/amount) and fulfil it if the gateway confirms a matching successful
+     * transaction. Shared by both the callback webhook and the browser return path.
+     */
+    private function verifyAndFulfill(Payment $payment): void
+    {
+        if ($payment->status !== 'pending') {
+            return;
+        }
+
+        $gateway = PaymentGatewayFactory::resolve($payment->subscription->payment_gateway);
+
+        try {
+            $txn = $gateway->getTransaction($payment->bill_code ?? '');
+
+            // ToyyibPay returns billpaymentAmount in RM (e.g. "6.00"); normalise to sen.
+            $paidCents = isset($txn['billpaymentAmount'])
+                ? (int) round(((float) $txn['billpaymentAmount']) * 100)
+                : null;
+
+            if ($txn && $paidCents === (int) $payment->amount) {
+                $this->fulfillPayment($payment->subscription, $payment);
+            } else {
+                \Log::warning('Payment verification amount mismatch or txn not found', [
+                    'payment_id' => $payment->id,
+                    'expected_cents' => $payment->amount,
+                    'paid_cents' => $paidCents,
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to verify transaction', ['payment_id' => $payment->id, 'error' => $e->getMessage()]);
+        }
     }
 
     /**
