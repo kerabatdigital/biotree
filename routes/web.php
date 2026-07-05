@@ -5,7 +5,13 @@ use App\Http\Controllers\OutboundClickController;
 use App\Http\Controllers\PublicProfileController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\TrackController;
+use App\Http\Middleware\EnsureAdmin;
 use App\Http\Middleware\EnsureOnboarded;
+use App\Livewire\Admin\Overview;
+use App\Livewire\Admin\Reports;
+use App\Livewire\Admin\Settings;
+use App\Livewire\Admin\UserDetail;
+use App\Livewire\Admin\Users;
 use App\Livewire\App\Analytics;
 use App\Livewire\App\AppearanceEditor;
 use App\Livewire\App\LinkEditor;
@@ -33,6 +39,15 @@ Route::middleware(['auth', 'verified', EnsureOnboarded::class])->group(function 
 Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
+
+// Admin routes - protected by auth + verified + admin middleware
+Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/', Overview::class)->name('admin.dashboard');
+    Route::get('/users', Users::class)->name('admin.users');
+    Route::get('/users/{user}', UserDetail::class)->name('admin.users.show');
+    Route::get('/reports', Reports::class)->name('admin.reports');
+    Route::get('/settings', Settings::class)->name('admin.settings');
+});
 
 // Click tracking → outbound redirect (public). Link resolved by ULID.
 Route::get('out/{link}', OutboundClickController::class)->name('link.out');

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureAdmin;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -15,6 +16,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // Page-view beacon is public and sent via navigator.sendBeacon (no CSRF token).
         $middleware->validateCsrfTokens(except: [
             'track/*',
+        ]);
+
+        // Admin middleware alias
+        $middleware->alias([
+            'admin' => EnsureAdmin::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
