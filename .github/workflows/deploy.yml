@@ -60,24 +60,50 @@ jobs:
           password: ${{ secrets.DEPLOY_PASSWORD }}
           port: ${{ secrets.DEPLOY_PORT || '22' }}
           script: |
-            cd /root/coolify/apps/biotree
+            # Stop current container
+            docker stop biotree-app 2>/dev/null || true
+            docker rm biotree-app 2>/dev/null || true
             
-            # Pull latest changes (if using git)
-            # git pull origin main
+            # Run new container with latest image
+            docker run -d \
+              --name biotree-app \
+              --network coolify \
+              --restart unless-stopped \
+              --label 'coolify.managed=true' \
+              --label 'coolify.type=application' \
+              -p 80:80 -p 443:443 \
+              7c1bc338-b6d8-4238-8463-3da8db09cb60:latest
             
-            # Run migrations
-            php artisan migrate --force
+            # Wait for startup
+            sleep 10
             
-            # Build assets (if needed)
-            # npm ci && npm run build
+            # Setup environment
+            docker exec biotree-app sh -c '
+              cp /var/www/html/.env.example /var/www/html/.env 2>/dev/null || true
+              php artisan key:generate --force
+              php artisan migrate --force
+              php artisan config:cache
+            '
             
-            # Clear caches
-            php artisan config:cache
-            php artisan route:cache
-            php artisan view:cache
-            
-            # Restart workers
-            # php artisan queue:restart
+            # Restart to apply changes
+            docker restart biotree-app
+
+  migrate:
+    name: Run Migrations
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.inputs.action == 'migrate'
+    
+    steps:
+      - name: Run Migrations via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          password: ${{ secrets.DEPLOY_PASSWORD }}
+          port: ${{ secrets.DEPLOY_PORT || '22' }}
+          script: |
+            docker exec biotree-app php artisan migrate --force
+            docker exec biotree-app php artisan config:cache
 
   logs:
     name: View Logs
@@ -93,7 +119,7 @@ jobs:
           password: ${{ secrets.DEPLOY_PASSWORD }}
           port: ${{ secrets.DEPLOY_PORT || '22' }}
           script: |
-            docker logs --tail 100 biotree-app 2>&1 || echo "Container not found"
+            docker logs --tail 100 biotree-app 2>&1
 
   restart:
     name: Restart App
@@ -109,5 +135,4 @@ jobs:
           password: ${{ secrets.DEPLOY_PASSWORD }}
           port: ${{ secrets.DEPLOY_PORT || '22' }}
           script: |
-            cd /root/coolify/apps/biotree
-            docker compose restart
+            docker restart biotree-app
