@@ -43,7 +43,10 @@ RUN apk add --no-cache \
     git \
     libzip \
     oniguruma \
-    libpq \
+    oniguruma-dev \
+    libzip-dev \
+    icu-dev \
+    libpq-dev \
     librsvg \
     redis \
     supervisor \
