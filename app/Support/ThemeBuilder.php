@@ -2,10 +2,6 @@
 
 namespace App\Support;
 
-/**
- * Turns the editor's high-level theme inputs into the concrete values the
- * public page renders. One source of truth for editor, live preview and page.
- */
 class ThemeBuilder
 {
     public static function build(array $in): array
@@ -18,6 +14,8 @@ class ThemeBuilder
         $radius = $in['button_radius'] ?? '16px';
         $font = $in['font'] ?? 'figtree';
         $avatarShape = in_array($in['avatar_shape'] ?? 'circle', ['circle', 'rounded', 'square'], true) ? $in['avatar_shape'] : 'circle';
+        $bgAnimation = $in['bg_animation'] ?? 'none';
+        $linkAnimation = $in['link_animation'] ?? 'none';
 
         [$btnBg, $btnText, $btnBorder] = match ($style) {
             'solid' => [$accent, self::contrast($accent), $accent],
@@ -26,7 +24,7 @@ class ThemeBuilder
         };
 
         return [
-            // inputs (preserved so the editor can reload the exact choices)
+            // inputs
             'preset' => $in['preset'] ?? 'custom',
             'bg' => $bg,
             'bg_end' => $bgEnd,
@@ -36,15 +34,24 @@ class ThemeBuilder
             'button_radius' => $radius,
             'avatar_shape' => $avatarShape,
             'font' => $font,
-            // derived (consumed by the public page)
+            'bg_animation' => $bgAnimation,
+            'link_animation' => $linkAnimation,
+            // derived
             'muted' => self::rgba($text, 0.58),
             'button_bg' => $btnBg,
             'button_text' => $btnText,
             'button_border' => $btnBorder,
+            // gradient CSS
+            'gradient' => $bg !== $bgEnd 
+                ? "linear-gradient(135deg, {$bg} 0%, {$bgEnd} 100%)" 
+                : $bg,
+            // accent glow
+            'accent_glow' => self::rgba($accent, 0.3),
+            'accent_rgba' => self::rgba($accent, 1),
         ];
     }
 
-    protected static function rgb(string $hex): array
+    public static function rgb(string $hex): array
     {
         $hex = ltrim($hex, '#');
         if (strlen($hex) === 3) {
@@ -53,25 +60,26 @@ class ThemeBuilder
         if (strlen($hex) !== 6 || ! ctype_xdigit($hex)) {
             return [255, 255, 255];
         }
-
         return [hexdec(substr($hex, 0, 2)), hexdec(substr($hex, 2, 2)), hexdec(substr($hex, 4, 2))];
     }
 
-    protected static function rgba(string $hex, float $alpha): string
+    public static function rgba(string $hex, float $alpha): string
     {
         [$r, $g, $b] = self::rgb($hex);
-
         return "rgba($r, $g, $b, $alpha)";
     }
 
-    /**
-     * Pick black or white for legible text over the given colour.
-     */
-    protected static function contrast(string $hex): string
+    public static function contrast(string $hex): string
     {
         [$r, $g, $b] = self::rgb($hex);
         $luminance = (0.2126 * $r + 0.7152 * $g + 0.0722 * $b) / 255;
-
         return $luminance > 0.6 ? '#0a0a0a' : '#ffffff';
+    }
+
+    public static function isDark(string $hex): bool
+    {
+        [$r, $g, $b] = self::rgb($hex);
+        $luminance = (0.2126 * $r + 0.7152 * $g + 0.0722 * $b) / 255;
+        return $luminance < 0.5;
     }
 }

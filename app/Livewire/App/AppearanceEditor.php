@@ -16,33 +16,23 @@ class AppearanceEditor extends Component
 {
     use WithFileUploads;
 
-    // Profile basics
     public string $display_name = '';
-
     public string $tagline = '';
-
     public string $bio = '';
+    public $avatar = null;
 
-    public $avatar = null; // freshly uploaded temp file
-
-    // Theme inputs
+    // Theme
     public string $preset = 'custom';
-
     public string $bg = '';
-
     public string $bg_end = '';
-
     public string $text = '';
-
     public string $accent = '';
-
     public string $button_style = 'soft';
-
     public string $button_radius = '16px';
-
     public string $avatar_shape = 'circle';
-
     public string $font = 'figtree';
+    public string $bg_animation = 'none';
+    public string $link_animation = 'none';
 
     public function mount(): void
     {
@@ -53,7 +43,7 @@ class AppearanceEditor extends Component
         $this->tagline = $profile->tagline ?? '';
         $this->bio = $profile->bio ?? '';
 
-        foreach (['preset', 'bg', 'bg_end', 'text', 'accent', 'button_style', 'button_radius', 'avatar_shape', 'font'] as $key) {
+        foreach (['preset', 'bg', 'bg_end', 'text', 'accent', 'button_style', 'button_radius', 'avatar_shape', 'font', 'bg_animation', 'link_animation'] as $key) {
             $this->{$key} = (string) ($theme[$key] ?? '');
         }
     }
@@ -68,17 +58,16 @@ class AppearanceEditor extends Component
         $preset = config("biotree.theme_presets.{$name}");
 
         if ($preset) {
-            $this->bg = $preset['bg'];
-            $this->bg_end = $preset['bg_end'];
-            $this->text = $preset['text'];
-            $this->accent = $preset['accent'];
             $this->preset = $name;
+            $this->bg = $preset['bg'] ?? '';
+            $this->bg_end = $preset['bg_end'] ?? $preset['bg'] ?? '';
+            $this->text = $preset['text'] ?? '';
+            $this->accent = $preset['accent'] ?? '';
         }
     }
 
     public function updated(string $property): void
     {
-        // A manual colour tweak means we're no longer on a named preset.
         if (in_array($property, ['bg', 'bg_end', 'text', 'accent'], true)) {
             $this->preset = 'custom';
         }
@@ -134,6 +123,8 @@ class AppearanceEditor extends Component
             'button_radius' => ['required', 'string', 'max:12'],
             'avatar_shape' => ['required', 'in:circle,rounded,square'],
             'font' => ['required', 'in:'.implode(',', array_keys(config('biotree.fonts')))],
+            'bg_animation' => ['required', 'in:'.implode(',', array_keys(config('biotree.bg_animations')))],
+            'link_animation' => ['required', 'in:'.implode(',', array_keys(config('biotree.link_animations')))],
         ];
     }
 
@@ -149,20 +140,21 @@ class AppearanceEditor extends Component
             'button_radius' => $this->button_radius,
             'avatar_shape' => $this->avatar_shape,
             'font' => $this->font,
+            'bg_animation' => $this->bg_animation,
+            'link_animation' => $this->link_animation,
         ];
-    }
-
-    public function getPreviewThemeProperty(): array
-    {
-        return ThemeBuilder::build($this->themeInputs());
     }
 
     public function render()
     {
+        $theme = ThemeBuilder::build($this->themeInputs());
+
         return view('livewire.app.appearance-editor', [
             'presets' => config('biotree.theme_presets'),
+            'bgAnimations' => config('biotree.bg_animations'),
+            'linkAnimations' => config('biotree.link_animations'),
             'fonts' => config('biotree.fonts'),
-            'theme' => $this->previewTheme,
+            'theme' => $theme,
             'profile' => $this->profile(),
             'links' => $this->profile()->links()->active()->ordered()->get(),
         ]);
