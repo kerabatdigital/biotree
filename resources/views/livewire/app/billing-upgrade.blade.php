@@ -28,62 +28,42 @@
         @endif
 
         <!-- Plans Grid -->
-        <div class="grid md:grid-cols-2 gap-8 mb-8">
+        <div class="grid md:grid-cols-3 gap-8 mb-8">
             @foreach ($plans as $plan)
-                <div class="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow">
-                    <div class="p-8">
+                @php
+                    $planPeriod = $plan->monthly_price_cents ? 'monthly' : 'yearly';
+                    $planPriceCents = $plan->monthly_price_cents ?? $plan->yearly_price_cents;
+                @endphp
+                <div @class([
+                    'bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow border-2',
+                    'border-green-500' => $selectedPlanId === $plan->id,
+                    'border-transparent' => $selectedPlanId !== $plan->id,
+                ])>
+                    <div class="p-8 flex flex-col h-full">
                         <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ $plan->name }}</h3>
                         <p class="text-gray-600 mb-6">{{ $plan->description }}</p>
 
-                        <!-- Pricing Toggle -->
-                        <div class="mb-6 flex gap-4">
-                            <label class="flex items-center cursor-pointer">
-                                <input
-                                    type="radio"
-                                    wire:model="billingPeriod"
-                                    value="monthly"
-                                    @checked($billingPeriod === 'monthly')
-                                    class="w-4 h-4 text-blue-600"
-                                />
-                                <span class="ml-2 text-gray-700">Monthly</span>
-                            </label>
-                            <label class="flex items-center cursor-pointer">
-                                <input
-                                    type="radio"
-                                    wire:model="billingPeriod"
-                                    value="yearly"
-                                    @checked($billingPeriod === 'yearly')
-                                    class="w-4 h-4 text-blue-600"
-                                />
-                                <span class="ml-2 text-gray-700">Yearly</span>
-                            </label>
-                        </div>
-
                         <!-- Price -->
                         <div class="mb-6">
-                            @if ($billingPeriod === 'monthly' && $plan->monthly_price_cents)
+                            @if ($planPriceCents)
                                 <div class="text-4xl font-bold text-gray-900">
-                                    RM {{ number_format($plan->monthly_price_cents / 100, 2) }}
+                                    RM {{ number_format($planPriceCents / 100, 2) }}
                                 </div>
-                                <p class="text-gray-600">per month</p>
-                            @elseif ($billingPeriod === 'yearly' && $plan->yearly_price_cents)
-                                <div class="text-4xl font-bold text-gray-900">
-                                    RM {{ number_format($plan->yearly_price_cents / 100, 2) }}
-                                </div>
-                                <p class="text-gray-600">per year</p>
+                                <p class="text-gray-600">per {{ $planPeriod === 'monthly' ? 'month' : 'year' }}</p>
                             @else
-                                <p class="text-gray-600">Price not available</p>
+                                <div class="text-4xl font-bold text-gray-900">Free</div>
+                                <p class="text-gray-600">forever</p>
                             @endif
                         </div>
 
                         <!-- Features -->
                         @if ($plan->features && count($plan->features) > 0)
-                            <div class="mb-6">
+                            <div class="mb-6 flex-1">
                                 <h4 class="font-semibold text-gray-900 mb-3">Features</h4>
                                 <ul class="space-y-2">
                                     @foreach ($plan->features as $feature)
                                         <li class="flex items-center text-gray-600">
-                                            <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                            <svg class="w-5 h-5 text-green-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                                             </svg>
                                             {{ $feature }}
@@ -106,68 +86,60 @@
                         @endif
 
                         <!-- Select Plan Button -->
-                        <button
-                            wire:click="selectPlan({{ $plan->id }}, '{{ $billingPeriod }}')"
-                            @class([
-                                'w-full py-3 px-4 rounded-lg font-semibold transition-colors',
-                                'bg-blue-600 text-white hover:bg-blue-700' => $selectedPlanId !== $plan->id,
-                                'bg-green-600 text-white hover:bg-green-700' => $selectedPlanId === $plan->id,
-                            ])
-                        >
-                            @if ($selectedPlanId === $plan->id)
-                                Selected
-                            @else
-                                Select Plan
-                            @endif
-                        </button>
+                        @if ($planPriceCents)
+                            <button
+                                wire:click="selectPlan({{ $plan->id }})"
+                                @class([
+                                    'w-full py-3 px-4 rounded-lg font-semibold transition-colors',
+                                    'bg-blue-600 text-white hover:bg-blue-700' => $selectedPlanId !== $plan->id,
+                                    'bg-green-600 text-white hover:bg-green-700' => $selectedPlanId === $plan->id,
+                                ])
+                            >
+                                {{ $selectedPlanId === $plan->id ? 'Selected' : 'Select Plan' }}
+                            </button>
+                        @else
+                            <div class="w-full py-3 px-4 rounded-lg font-semibold text-center bg-gray-100 text-gray-500">
+                                Your current default plan
+                            </div>
+                        @endif
                     </div>
                 </div>
             @endforeach
         </div>
 
-        <!-- Coupon Code Section -->
+        <!-- Checkout Section (always visible once a paid plan is selected) -->
         @if ($selectedPlanId)
-            <div class="bg-white rounded-lg shadow p-8 mb-8">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Have a coupon code?</h3>
-                <div class="flex gap-4">
-                    <input
-                        type="text"
-                        wire:model="couponCode"
-                        placeholder="Enter coupon code (optional)"
-                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                    @error('couponCode')
-                        <span class="text-red-600 text-sm">{{ $message }}</span>
-                    @enderror
-                </div>
-            </div>
-        @endif
+            <div class="sticky bottom-4 bg-white rounded-lg shadow-lg border border-gray-200 p-6">
+                <div class="grid md:grid-cols-3 gap-4 items-end">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold text-gray-900 mb-2">Have a coupon code?</label>
+                        <input
+                            type="text"
+                            wire:model="couponCode"
+                            placeholder="Enter coupon code (optional)"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                        @error('couponCode')
+                            <span class="text-red-600 text-sm">{{ $message }}</span>
+                        @enderror
+                    </div>
 
-        <!-- Checkout Button -->
-        @if ($selectedPlanId)
-            <div class="flex justify-center">
-                <button
-                    wire:click="proceedToCheckout"
-                    wire:loading.attr="disabled"
-                    class="px-8 py-4 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400"
-                >
-                    @if ($processingCheckout)
-                        <span wire:loading class="inline-flex items-center">
+                    <button
+                        wire:click="proceedToCheckout"
+                        wire:loading.attr="disabled"
+                        wire:target="proceedToCheckout"
+                        class="w-full px-8 py-3 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400"
+                    >
+                        <span wire:loading.remove wire:target="proceedToCheckout">Proceed to Checkout</span>
+                        <span wire:loading wire:target="proceedToCheckout" class="inline-flex items-center justify-center">
                             <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
                             Processing...
                         </span>
-                        <span wire:loading.remove>Proceed to Checkout</span>
-                    @else
-                        Proceed to Checkout
-                    @endif
-                </button>
-            </div>
-        @else
-            <div class="text-center text-gray-600">
-                <p>Select a plan to proceed to checkout</p>
+                    </button>
+                </div>
             </div>
         @endif
 

@@ -25,10 +25,12 @@ class BillingUpgrade extends Component
         ];
     }
 
-    public function selectPlan(int $planId, string $period = 'monthly'): void
+    public function selectPlan(int $planId): void
     {
+        $plan = Plan::findOrFail($planId);
+
         $this->selectedPlanId = $planId;
-        $this->billingPeriod = $period;
+        $this->billingPeriod = $plan->monthly_price_cents ? 'monthly' : 'yearly';
     }
 
     public function proceedToCheckout()
