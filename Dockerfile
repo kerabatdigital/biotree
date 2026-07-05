@@ -73,8 +73,11 @@ RUN apk add --no-cache --virtual .build-deps \
     make \
     musl-dev
 
-# Redis extension
-RUN pecl install redis && docker-php-ext-enable redis
+# Redis extension — refresh the pecl channel first, otherwise the base image's
+# stale channel cache can fail with "No releases available for package .../redis".
+RUN pecl channel-update pecl.php.net \
+ && pecl install redis \
+ && docker-php-ext-enable redis
 
 # Remove build dependencies
 RUN apk del .build-deps
