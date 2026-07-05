@@ -55,7 +55,7 @@ class BillingController extends Controller
         // Apply coupon if provided
         $coupon = null;
         $discountCents = 0;
-        if ($data['coupon_code']) {
+        if (!empty($data['coupon_code'])) {
             $coupon = Coupon::where('code', $data['coupon_code'])->first();
 
             if (!$coupon || !$coupon->isValid()) {
@@ -79,11 +79,13 @@ class BillingController extends Controller
             'payment_gateway' => 'toyyibpay',
         ]);
 
-        // Create payment record
+        // Create local pending payment BEFORE creating the gateway bill, keyed by our
+        // own external reference. The gateway's bill_code is filled in afterwards.
         $payment = Payment::create([
             'user_id' => $user->id,
             'subscription_id' => $subscription->id,
             'plan_id' => $plan->id,
+            'external_ref' => $externalRef,
             'amount' => $amountCents,
             'status' => 'pending',
         ]);
@@ -93,7 +95,7 @@ class BillingController extends Controller
             $gateway = PaymentGatewayFactory::resolve('toyyibpay');
 
             // Create payment session with gateway
-            $checkoutUrl = $gateway->createPaymentSession(
+            $session = $gateway->createPaymentSession(
                 externalReference: $externalRef,
                 amountCents: $amountCents,
                 description: "{$plan->name} ({$billingPeriod})",
@@ -101,13 +103,14 @@ class BillingController extends Controller
                 callbackUrl: route('billing.callback'),
             );
 
-            // Store gateway reference in payment (will be populated by callback)
-            $payment->update(['raw_payload' => ['external_ref' => $externalRef]]);
+            // Persist the gateway's bill reference so we can re-verify the transaction later.
+            $payment->update(['bill_code' => $session['reference']]);
 
-            return redirect($checkoutUrl);
+            return redirect($session['checkout_url']);
         } catch (\Exception $e) {
-            $subscription->delete();
+            // Delete the payment first — it holds the FK to the subscription.
             $payment->delete();
+            $subscription->delete();
 
             \Log::error('Billing checkout failed', ['error' => $e->getMessage(), 'user_id' => $user->id]);
             return back()->withErrors(['error' => 'Failed to initiate payment. Please try again.']);
@@ -141,8 +144,8 @@ class BillingController extends Controller
         $status = $callbackData['status'] ?? null;
         $orderId = $callbackData['order_id'] ?? null;
 
-        // Find payment by external reference
-        $payment = Payment::whereJsonContains('raw_payload->external_ref', $orderId)->first();
+        // Find payment by our canonical external reference (order_id == billExternalReferenceNo).
+        $payment = Payment::where('external_ref', $orderId)->first();
 
         if (!$payment) {
             \Log::warning('Callback for unknown payment', ['order_id' => $orderId]);
@@ -151,20 +154,30 @@ class BillingController extends Controller
 
         $subscription = $payment->subscription;
 
-        // Store callback payload
+        // Store callback payload for audit.
         $payment->raw_payload = $callbackData;
         $payment->save();
 
         // Status 1 = successful, 2 = pending, 3 = failed
         if ($status === '1') {
             try {
-                // Verify payment via API
-                $txn = $gateway->getTransaction($callbackData['refno'] ?? '');
+                // Re-verify against the gateway using our stored bill reference (never trust
+                // the callback body alone). getBillTransactions needs the BillCode.
+                $txn = $gateway->getTransaction($payment->bill_code ?? '');
 
-                if ($txn && ($txn['billpaymentAmount'] ?? 0) == $payment->amount) {
+                // ToyyibPay returns billpaymentAmount in RM (e.g. "6.00"); normalise to sen.
+                $paidCents = isset($txn['billpaymentAmount'])
+                    ? (int) round(((float) $txn['billpaymentAmount']) * 100)
+                    : null;
+
+                if ($txn && $paidCents === (int) $payment->amount) {
                     $this->fulfillPayment($subscription, $payment);
                 } else {
-                    \Log::warning('Callback amount mismatch', ['payment_id' => $payment->id]);
+                    \Log::warning('Callback amount mismatch or txn not found', [
+                        'payment_id' => $payment->id,
+                        'expected_cents' => $payment->amount,
+                        'paid_cents' => $paidCents,
+                    ]);
                 }
             } catch (\Exception $e) {
                 \Log::error('Failed to verify transaction', ['payment_id' => $payment->id, 'error' => $e->getMessage()]);

@@ -11,6 +11,7 @@ class Payment extends Model
         'user_id',
         'subscription_id',
         'plan_id',
+        'external_ref',
         'bill_code',
         'amount',
         'status',

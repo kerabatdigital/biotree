@@ -12,7 +12,7 @@ class BayarCashGateway implements PaymentGateway
         string $description,
         string $returnUrl,
         string $callbackUrl,
-    ): string {
+    ): array {
         throw new \Exception('BayarCash gateway not yet implemented');
     }
 

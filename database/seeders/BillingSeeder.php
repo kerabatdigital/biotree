@@ -11,9 +11,8 @@ class BillingSeeder extends Seeder
     public function run(): void
     {
         // Free plan
-        Plan::create([
+        Plan::updateOrCreate(['slug' => 'free'], [
             'name' => 'Free',
-            'slug' => 'free',
             'description' => 'Get started with BioTree free plan',
             'monthly_price_cents' => null,
             'yearly_price_cents' => null,
@@ -31,9 +30,8 @@ class BillingSeeder extends Seeder
         ]);
 
         // Pro Monthly plan - RM 6/month = 600 cents
-        Plan::create([
+        Plan::updateOrCreate(['slug' => 'pro_monthly'], [
             'name' => 'Pro Monthly',
-            'slug' => 'pro_monthly',
             'description' => 'Unlimited links and custom branding',
             'monthly_price_cents' => 600,
             'yearly_price_cents' => null,
@@ -54,9 +52,8 @@ class BillingSeeder extends Seeder
         ]);
 
         // Pro Yearly plan - RM 40/year = 4000 cents
-        Plan::create([
+        Plan::updateOrCreate(['slug' => 'pro_yearly'], [
             'name' => 'Pro Yearly',
-            'slug' => 'pro_yearly',
             'description' => 'Save 33% with annual billing',
             'monthly_price_cents' => null,
             'yearly_price_cents' => 4000,
@@ -77,8 +74,7 @@ class BillingSeeder extends Seeder
         ]);
 
         // Sample coupons for testing
-        Coupon::create([
-            'code' => 'WELCOME20',
+        Coupon::updateOrCreate(['code' => 'WELCOME20'], [
             'discount_percent' => 20,
             'discount_fixed_cents' => null,
             'applies_to' => 'first_purchase',
@@ -89,8 +85,7 @@ class BillingSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        Coupon::create([
-            'code' => 'SAVE50',
+        Coupon::updateOrCreate(['code' => 'SAVE50'], [
             'discount_fixed_cents' => 300, // RM 3 off
             'discount_percent' => null,
             'applies_to' => 'all_renewals',
@@ -101,8 +96,7 @@ class BillingSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        Coupon::create([
-            'code' => 'EARLYBIRD15',
+        Coupon::updateOrCreate(['code' => 'EARLYBIRD15'], [
             'discount_percent' => 15,
             'discount_fixed_cents' => null,
             'applies_to' => 'first_purchase',

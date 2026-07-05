@@ -5,7 +5,11 @@ namespace App\Contracts;
 interface PaymentGateway
 {
     /**
-     * Create a payment session and return a redirect URL for checkout.
+     * Create a payment session.
+     *
+     * @return array{checkout_url: string, reference: ?string} The hosted checkout URL
+     *         and the gateway's own bill/session reference (used later to verify the
+     *         transaction). `reference` may be null for gateways that don't expose one.
      */
     public function createPaymentSession(
         string $externalReference,
@@ -13,7 +17,7 @@ interface PaymentGateway
         string $description,
         string $returnUrl,
         string $callbackUrl,
-    ): string;
+    ): array;
 
     /**
      * Verify callback authenticity using the gateway's signature method.

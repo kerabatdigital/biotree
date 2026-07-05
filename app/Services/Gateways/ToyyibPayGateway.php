@@ -15,7 +15,7 @@ class ToyyibPayGateway implements PaymentGateway
         string $description,
         string $returnUrl,
         string $callbackUrl,
-    ): string {
+    ): array {
         $billCode = $this->toyyibpay->createBill(
             amountCents: $amountCents,
             externalReference: $externalReference,
@@ -24,7 +24,10 @@ class ToyyibPayGateway implements PaymentGateway
             callbackUrl: $callbackUrl,
         );
 
-        return $this->toyyibpay->getCheckoutUrl($billCode);
+        return [
+            'checkout_url' => $this->toyyibpay->getCheckoutUrl($billCode),
+            'reference' => $billCode,
+        ];
     }
 
     public function verifyCallback(array $callbackData): bool
