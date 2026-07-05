@@ -6,6 +6,14 @@
     <title>{{ config('app.name', 'BioTree') }} — One link for everything</title>
     <meta name="description" content="BioTree is a superfast, mobile-first link-in-bio for creators and businesses in Malaysia. One page for all your links, with live analytics and custom themes.">
 
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="BioTree — One link for everything">
+    <meta property="og:description" content="A superfast, mobile-first link-in-bio for creators and businesses in Malaysia.">
+    <meta property="og:image" content="{{ asset('og-default.png') }}">
+    <meta name="twitter:card" content="summary_large_image">
+
+    @include('partials.pwa-head')
+
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800" rel="stylesheet" />
 

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\OutboundClickController;
 use App\Http\Controllers\PublicProfileController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\TrackController;
 use App\Http\Middleware\EnsureOnboarded;
 use App\Livewire\App\Analytics;
@@ -39,10 +40,21 @@ Route::get('out/{link}', OutboundClickController::class)->name('link.out');
 // Page-view beacon (CSRF-exempt — see bootstrap/app.php).
 Route::post('track/view', [TrackController::class, 'view'])->name('track.view');
 
+// SEO
+Route::get('sitemap.xml', SitemapController::class)->name('sitemap');
+
 require __DIR__.'/auth.php';
 
 // Public profile page — catch-all, MUST remain the last route so every
 // named/app route above takes precedence. Reserved usernames can't be claimed.
+// No session/cookies on the public page → no Set-Cookie → Cloudflare-cacheable.
 Route::get('{username}', [PublicProfileController::class, 'show'])
     ->where('username', '[A-Za-z0-9_]+')
+    ->withoutMiddleware([
+        \Illuminate\Session\Middleware\StartSession::class,
+        \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+        \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+        \Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class,
+        \Livewire\Features\SupportDisablingBackButtonCache\DisableBackButtonCacheMiddleware::class,
+    ])
     ->name('profile.show');

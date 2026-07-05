@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0a0a0a"/>
+      <stop offset="1" stop-color="#18181b"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="600" cy="150" r="300" fill="#34d399" opacity="0.10"/>
+  <g transform="translate(536,110)">
+    <rect width="128" height="128" rx="34" fill="#34d399" opacity="0.16"/>
+    <g transform="translate(24,24) scale(0.3125)" fill="#34d399">
+      <path d="M128,187.85a72.44,72.44,0,0,0,8,4.62V232a8,8,0,0,1-16,0V192.47A72.44,72.44,0,0,0,128,187.85ZM198.1,62.59a76,76,0,0,0-140.2,0A71.71,71.71,0,0,0,16,127.8C15.9,166,48,199,86.14,200A72.22,72.22,0,0,0,120,192.47V156.94L76.42,135.16a8,8,0,1,1,7.16-14.32L120,139.06V88a8,8,0,0,1,16,0v27.06l36.42-18.22a8,8,0,1,1,7.16,14.32L136,132.94v59.53A72.17,72.17,0,0,0,168,200l1.82,0C208,199,240.11,166,240,127.8A71.71,71.71,0,0,0,198.1,62.59Z"/>
+    </g>
+  </g>
+  <text x="600" y="360" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="76" font-weight="bold" fill="#ffffff">BioTree</text>
+  <text x="600" y="418" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="30" fill="#a1a1aa">One link for everything you are.</text>
+  <text x="600" y="565" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="24" fill="#52525b">biotree.my</text>
+</svg>

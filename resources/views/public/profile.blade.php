@@ -24,10 +24,8 @@
     <meta property="og:title" content="{{ $displayName }}">
     <meta property="og:description" content="{{ \Illuminate\Support\Str::limit($description, 160) }}">
     <meta property="og:url" content="{{ url('/'.$profile->username) }}">
-    @if ($avatarUrl)
-        <meta property="og:image" content="{{ $avatarUrl }}">
-    @endif
-    <meta name="twitter:card" content="summary">
+    <meta property="og:image" content="{{ $avatarUrl ?: asset('og-default.png') }}">
+    <meta name="twitter:card" content="{{ $avatarUrl ? 'summary' : 'summary_large_image' }}">
     <meta name="twitter:title" content="{{ $displayName }}">
     <meta name="twitter:description" content="{{ \Illuminate\Support\Str::limit($description, 160) }}">
 
