@@ -15,7 +15,7 @@ use Illuminate\Notifications\Notifiable;
 
 // Note: role/status/plan are intentionally NOT mass-assignable (DB defaults only)
 // so a user can never escalate their own privileges via mass assignment.
-#[Fillable(['name', 'email', 'password', 'google_id', 'avatar', 'locale', 'last_login_at'])]
+#[Fillable(['name', 'email', 'phone', 'password', 'google_id', 'avatar', 'locale', 'last_login_at'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {

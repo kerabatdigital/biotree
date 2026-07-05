@@ -17,6 +17,7 @@ class ToyyibPayGateway implements PaymentGateway
         string $callbackUrl,
         string $payorName,
         string $payorEmail,
+        string $payorPhone,
     ): array {
         $billCode = $this->toyyibpay->createBill(
             amountCents: $amountCents,
@@ -26,6 +27,7 @@ class ToyyibPayGateway implements PaymentGateway
             callbackUrl: $callbackUrl,
             payorName: $payorName,
             payorEmail: $payorEmail,
+            payorPhone: $payorPhone,
         );
 
         return [

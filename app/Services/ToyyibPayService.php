@@ -33,7 +33,7 @@ class ToyyibPayService
         string $callbackUrl,
         string $payorName,
         string $payorEmail,
-        string $payorPhone = '0000000000',
+        string $payorPhone,
     ): string {
         $response = Http::asForm()->post("{$this->baseUrl}createBill", [
             'userSecretKey' => $this->secretKey,

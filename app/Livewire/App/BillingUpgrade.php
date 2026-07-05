@@ -14,7 +14,13 @@ class BillingUpgrade extends Component
     public ?int $selectedPlanId = null;
     public string $billingPeriod = 'monthly';
     public string $couponCode = '';
+    public string $phone = '';
     public bool $processingCheckout = false;
+
+    public function mount(): void
+    {
+        $this->phone = auth()->user()->phone ?? '';
+    }
 
     protected function rules(): array
     {
@@ -22,6 +28,8 @@ class BillingUpgrade extends Component
             'selectedPlanId' => ['required', 'exists:plans,id'],
             'billingPeriod' => ['required', 'in:monthly,yearly'],
             'couponCode' => ['nullable', 'string', 'max:50'],
+            // ToyyibPay requires a payer phone number to create a bill.
+            'phone' => ['required', 'string', 'regex:/^\+?[0-9]{8,15}$/'],
         ];
     }
 
@@ -38,6 +46,10 @@ class BillingUpgrade extends Component
         $this->validate();
 
         $this->processingCheckout = true;
+
+        // Persist the phone number on the user record (not passed via URL — it's PII).
+        // The checkout controller reads it from auth()->user()->phone.
+        auth()->user()->update(['phone' => $this->phone]);
 
         $checkoutUrl = route('billing.checkout', [
             'plan_id' => $this->selectedPlanId,

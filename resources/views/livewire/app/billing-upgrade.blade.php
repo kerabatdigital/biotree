@@ -110,7 +110,20 @@
         <!-- Checkout Section (always visible once a paid plan is selected) -->
         @if ($selectedPlanId)
             <div class="sticky bottom-4 bg-white rounded-lg shadow-lg border border-gray-200 p-6">
-                <div class="grid md:grid-cols-3 gap-4 items-end">
+                <div class="grid md:grid-cols-3 gap-4 items-end mb-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-900 mb-2">Phone number</label>
+                        <input
+                            type="tel"
+                            wire:model="phone"
+                            placeholder="e.g. 0123456789"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                        @error('phone')
+                            <span class="text-red-600 text-sm">{{ $message }}</span>
+                        @enderror
+                    </div>
+
                     <div class="md:col-span-2">
                         <label class="block text-sm font-semibold text-gray-900 mb-2">Have a coupon code?</label>
                         <input
@@ -123,7 +136,9 @@
                             <span class="text-red-600 text-sm">{{ $message }}</span>
                         @enderror
                     </div>
+                </div>
 
+                <div>
                     <button
                         wire:click="proceedToCheckout"
                         wire:loading.attr="disabled"

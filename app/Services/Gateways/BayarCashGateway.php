@@ -14,6 +14,7 @@ class BayarCashGateway implements PaymentGateway
         string $callbackUrl,
         string $payorName,
         string $payorEmail,
+        string $payorPhone,
     ): array {
         throw new \Exception('BayarCash gateway not yet implemented');
     }

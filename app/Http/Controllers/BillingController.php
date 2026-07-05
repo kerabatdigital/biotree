@@ -52,6 +52,11 @@ class BillingController extends Controller
             return back()->withErrors(["billing_period" => "This plan is not available for {$billingPeriod} billing"]);
         }
 
+        if (!$user->phone) {
+            return redirect()->route('billing.upgrade')
+                ->withErrors(['phone' => 'Please provide a phone number before checking out.']);
+        }
+
         // Apply coupon if provided
         $coupon = null;
         $discountCents = 0;
@@ -103,6 +108,7 @@ class BillingController extends Controller
                 callbackUrl: route('billing.callback'),
                 payorName: $user->name,
                 payorEmail: $user->email,
+                payorPhone: $user->phone,
             );
 
             // Persist the gateway's bill reference so we can re-verify the transaction later.
