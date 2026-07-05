@@ -13,7 +13,7 @@ COPY composer.json composer.lock* ./
 
 RUN composer config --no-interaction --no-scripts \
  && composer install --no-dev --no-autoloader --prefer-dist --ignore-platform-reqs \
- && composer dump-autoload --optimize
+ && composer dump-autoload --no-scripts --optimize
 
 # ─────────────────────────────────────────────
 # Stage 2: Frontend build
