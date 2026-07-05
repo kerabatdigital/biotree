@@ -1,0 +1,9 @@
+# Coolify Docker Compose Override
+# This file is for additional Coolify-specific configuration
+# The main docker-compose.yml is used for base configuration
+
+services:
+  app:
+    # Coolify will inject environment variables automatically
+    # Add any Coolify-specific volume mounts here if needed
+    volumes: []

@@ -1,0 +1,53 @@
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Keep .env but ignore .env.production if it exists
+.env
+.env.*
+!.env.example
+
+# Dependencies
+/node_modules
+/vendor
+
+# Build artifacts
+/public/build
+/public/hot
+/public/storage
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+/storage/logs/*.log
+*.log
+
+# Cache
+/bootstrap/cache/*
+!/bootstrap/cache/.gitkeep
+/storage/framework/cache/*
+!/storage/framework/cache/.gitkeep
+/storage/framework/views/*
+!/storage/framework/views/.gitkeep
+/storage/app/*
+!/storage/app/.gitkeep
+/storage/app/public/*
+!/storage/app/public/.gitkeep
+
+# Testing
+.phpunit.result.cache
+phpunit.xml
+coverage/
+
+# Misc
+*.bak
+*.tmp
