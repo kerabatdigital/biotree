@@ -25,9 +25,10 @@ Route::view('/', 'welcome');
 Route::get('auth/google', [GoogleController::class, 'redirect'])->name('auth.google');
 Route::get('auth/google/callback', [GoogleController::class, 'callback']);
 
-// Onboarding — claim your username. Auth required, but sits *before* the onboarded gate.
+// Onboarding — claim your username. Requires a verified email, but sits *before*
+// the onboarded gate (this is where verified users go to complete their profile).
 Route::get('onboarding', ClaimUsername::class)
-    ->middleware('auth')
+    ->middleware(['auth', 'verified'])
     ->name('onboarding');
 
 // Authenticated app (requires a completed profile).
