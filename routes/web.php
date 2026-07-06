@@ -21,6 +21,13 @@ use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome');
 
+// Public marketing & legal pages (SEO-indexed).
+Route::get('pricing', fn () => view('pages.pricing', [
+    'plans' => \App\Models\Plan::active()->orderBy('id')->get(),
+]))->name('pricing');
+Route::view('terms', 'pages.terms')->name('terms');
+Route::view('privacy', 'pages.privacy')->name('privacy');
+
 // Google OAuth (Socialite)
 Route::get('auth/google', [GoogleController::class, 'redirect'])->name('auth.google');
 Route::get('auth/google/callback', [GoogleController::class, 'callback']);

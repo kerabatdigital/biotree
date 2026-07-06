@@ -10,6 +10,9 @@ class SitemapController extends Controller
     {
         $urls = [
             ['loc' => url('/'), 'priority' => '1.0'],
+            ['loc' => url('/pricing'), 'priority' => '0.9'],
+            ['loc' => url('/terms'), 'priority' => '0.3'],
+            ['loc' => url('/privacy'), 'priority' => '0.3'],
         ];
 
         Profile::where('is_published', true)

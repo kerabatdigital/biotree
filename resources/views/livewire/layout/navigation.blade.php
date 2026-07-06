@@ -48,7 +48,18 @@ new class extends Component
             </div>
 
             <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
+            <div class="hidden sm:flex sm:items-center sm:ms-6 sm:gap-3">
+                @unless (auth()->user()->isPro())
+                    <a href="{{ route('billing.upgrade') }}" wire:navigate
+                       class="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-1.5 text-sm font-semibold text-amber-950 shadow-sm transition hover:from-amber-300 hover:to-amber-400">
+                        <x-phosphor-crown class="h-4 w-4" /> Upgrade
+                    </a>
+                @else
+                    <a href="{{ route('billing.subscriptions') }}" wire:navigate
+                       class="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
+                        <x-phosphor-crown class="h-3.5 w-3.5" /> PRO
+                    </a>
+                @endunless
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
@@ -67,6 +78,10 @@ new class extends Component
                             {{ __('Profile') }}
                         </x-dropdown-link>
 
+                        <x-dropdown-link :href="route('billing.subscriptions')" wire:navigate>
+                            {{ __('Billing & Plan') }}
+                        </x-dropdown-link>
+
                         <!-- Authentication -->
                         <button wire:click="logout" class="w-full text-start">
                             <x-dropdown-link>
@@ -77,8 +92,14 @@ new class extends Component
                 </x-dropdown>
             </div>
 
-            <!-- Hamburger -->
-            <div class="-me-2 flex items-center sm:hidden">
+            <!-- Hamburger + mobile upgrade CTA -->
+            <div class="-me-2 flex items-center gap-2 sm:hidden">
+                @unless (auth()->user()->isPro())
+                    <a href="{{ route('billing.upgrade') }}" wire:navigate
+                       class="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 px-3 py-1.5 text-xs font-bold text-amber-950">
+                        <x-phosphor-crown class="h-3.5 w-3.5" /> Upgrade
+                    </a>
+                @endunless
                 <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-900 focus:text-gray-500 dark:focus:text-gray-400 transition duration-150 ease-in-out">
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -113,6 +134,10 @@ new class extends Component
             <div class="mt-3 space-y-1">
                 <x-responsive-nav-link :href="route('profile')" wire:navigate>
                     {{ __('Profile') }}
+                </x-responsive-nav-link>
+
+                <x-responsive-nav-link :href="route('billing.subscriptions')" wire:navigate>
+                    {{ __('Billing & Plan') }}
                 </x-responsive-nav-link>
 
                 <!-- Authentication -->

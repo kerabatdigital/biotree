@@ -11,6 +11,27 @@
     <meta property="og:description" content="A superfast, mobile-first link-in-bio for creators and businesses in Malaysia.">
     <meta property="og:image" content="{{ asset('og-default.png') }}">
     <meta name="twitter:card" content="summary_large_image">
+    <link rel="canonical" href="{{ url('/') }}">
+
+    <script type="application/ld+json">
+    {!! json_encode([
+        '@context' => 'https://schema.org',
+        '@type' => 'Organization',
+        'name' => 'BioTree',
+        'url' => url('/'),
+        'logo' => asset('icons/icon-192.png'),
+        'description' => 'A superfast, mobile-first link-in-bio for creators and businesses in Malaysia.',
+        'areaServed' => 'MY',
+    ], JSON_UNESCAPED_SLASHES) !!}
+    </script>
+    <script type="application/ld+json">
+    {!! json_encode([
+        '@context' => 'https://schema.org',
+        '@type' => 'WebSite',
+        'name' => 'BioTree',
+        'url' => url('/'),
+    ], JSON_UNESCAPED_SLASHES) !!}
+    </script>
 
     @include('partials.pwa-head')
 
@@ -33,7 +54,8 @@
                 <x-phosphor-tree-fill class="h-7 w-7 text-emerald-400" />
                 <span>{{ config('app.name', 'BioTree') }}</span>
             </a>
-            <nav class="flex items-center gap-2 text-sm">
+            <nav class="flex items-center gap-1 text-sm sm:gap-2">
+                <a href="{{ route('pricing') }}" class="hidden rounded-full px-4 py-2 text-neutral-300 transition hover:text-white sm:inline-block">Pricing</a>
                 @auth
                     <a href="{{ url('/dashboard') }}" class="rounded-full bg-emerald-500 px-5 py-2 font-medium text-neutral-950 transition hover:bg-emerald-400">Dashboard</a>
                 @else
@@ -94,8 +116,16 @@
             </div>
         </main>
 
-        <footer class="mx-auto max-w-6xl px-6 pb-10 text-center text-sm text-neutral-600">
-            &copy; {{ date('Y') }} {{ config('app.name', 'BioTree') }} · biotree.my
+        <footer class="mx-auto max-w-6xl px-6 pb-10">
+            <nav class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-neutral-400">
+                <a href="{{ route('pricing') }}" class="transition hover:text-white">Pricing</a>
+                <a href="{{ route('terms') }}" class="transition hover:text-white">Terms</a>
+                <a href="{{ route('privacy') }}" class="transition hover:text-white">Privacy</a>
+                <a href="{{ route('register') }}" class="transition hover:text-white">Get started</a>
+            </nav>
+            <p class="mt-4 text-center text-sm text-neutral-600">
+                &copy; {{ date('Y') }} {{ config('app.name', 'BioTree') }} · biotree.my
+            </p>
         </footer>
     </div>
 </body>
