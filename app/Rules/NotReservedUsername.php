@@ -9,10 +9,18 @@ class NotReservedUsername implements ValidationRule
 {
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $reserved = array_map('strtolower', config('biotree.reserved_usernames', []));
+        $username = strtolower((string) $value);
 
-        if (in_array(strtolower((string) $value), $reserved, true)) {
-            $fail('That username is reserved. Please choose another.');
+        $reserved = array_map('strtolower', config('biotree.reserved_usernames', []));
+        if (in_array($username, $reserved, true)) {
+            $fail('That username isn\'t available.');
+
+            return;
+        }
+
+        $premium = array_map('strtolower', config('biotree.premium_usernames', []));
+        if (in_array($username, $premium, true)) {
+            $fail('This is a premium username — available to buy from the admin.');
         }
     }
 }

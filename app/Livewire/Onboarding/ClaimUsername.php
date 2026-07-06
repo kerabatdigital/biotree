@@ -7,6 +7,7 @@ use App\Notifications\WelcomeNotification;
 use App\Rules\NotReservedUsername;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -58,7 +59,54 @@ class ClaimUsername extends Component
     public function updatedUsername(): void
     {
         $this->username = Str::lower(trim($this->username));
-        $this->validateOnly('username');
+        // Live feedback is driven by the usernameStatus computed property below,
+        // so we don't run validateOnly() here (it would render premium/reserved
+        // handles as hard red errors instead of the friendly "buy from admin" hint).
+    }
+
+    /**
+     * Live availability state for the username field.
+     * Returns: null | 'short' | 'invalid' | 'reserved' | 'premium' | 'taken' | 'available'
+     */
+    #[Computed]
+    public function usernameStatus(): ?string
+    {
+        $u = strtolower(trim($this->username));
+
+        if ($u === '') {
+            return null;
+        }
+
+        if (! preg_match('/^[a-z0-9_]+$/', $u)) {
+            return 'invalid';
+        }
+
+        if (strlen($u) < config('biotree.username.min', 3)) {
+            return 'short';
+        }
+
+        if (in_array($u, array_map('strtolower', config('biotree.reserved_usernames', [])), true)) {
+            return 'reserved';
+        }
+
+        if (in_array($u, array_map('strtolower', config('biotree.premium_usernames', [])), true)) {
+            return 'premium';
+        }
+
+        if (Profile::where('username', $u)->exists()) {
+            return 'taken';
+        }
+
+        return 'available';
+    }
+
+    /**
+     * Contact address for buying a premium handle.
+     */
+    #[Computed]
+    public function premiumContact(): ?string
+    {
+        return config('biotree.premium_username_contact');
     }
 
     public function claim(): void
@@ -94,11 +142,14 @@ class ClaimUsername extends Component
 
         $base = $base !== '' ? substr($base, 0, 20) : 'user';
 
-        $reserved = array_map('strtolower', config('biotree.reserved_usernames', []));
+        $blocked = array_map('strtolower', array_merge(
+            config('biotree.reserved_usernames', []),
+            config('biotree.premium_usernames', []),
+        ));
         $candidate = $base;
         $i = 0;
 
-        while (in_array($candidate, $reserved, true) || Profile::where('username', $candidate)->exists()) {
+        while (in_array($candidate, $blocked, true) || Profile::where('username', $candidate)->exists()) {
             $candidate = $base.(++$i);
         }
 

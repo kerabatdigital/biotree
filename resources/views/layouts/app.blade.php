@@ -31,10 +31,13 @@
             @endif
 
             <!-- Page Content -->
-            <main>
+            <main class="pb-24 sm:pb-0">
                 {{ $slot }}
             </main>
         </div>
+
+        {{-- App-like bottom navigation (mobile only) --}}
+        @include('partials.mobile-nav')
 
         @include('partials.pwa-scripts')
     </body>

@@ -53,6 +53,31 @@ class OnboardingTest extends TestCase
         $this->assertDatabaseCount('profiles', 0);
     }
 
+    public function test_premium_usernames_cannot_be_claimed_for_free(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        Livewire::test(ClaimUsername::class)
+            ->set('display_name', 'Brand')
+            ->set('username', 'google') // premium handle
+            ->call('claim')
+            ->assertHasErrors('username');
+
+        $this->assertDatabaseCount('profiles', 0);
+    }
+
+    public function test_premium_username_shows_buy_from_admin_hint(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        Livewire::test(ClaimUsername::class)
+            ->set('username', 'google')
+            ->assertSee('premium handle')
+            ->assertSee('buy from the admin');
+    }
+
     public function test_duplicate_usernames_are_rejected(): void
     {
         $taken = User::factory()->create();

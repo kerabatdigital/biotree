@@ -17,8 +17,10 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Reserved usernames
+    | Reserved usernames (system)
     |--------------------------------------------------------------------------
+    | Route/system words that can never be a public profile handle (they would
+    | collide with app routes). These are NOT for sale — they're protected.
     */
     'reserved_usernames' => [
         'admin', 'administrator', 'dashboard', 'api', 'login', 'logout', 'register',
@@ -31,6 +33,70 @@ return [
         'assets', 'img', 'images', 'css', 'js', 'fonts', 'storage', 'public', 'null',
         'undefined', 'test', 'demo', 'track', 'up',
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Premium usernames (available to buy from admin)
+    |--------------------------------------------------------------------------
+    | Well-known brands, names and trending words. These can't be claimed for
+    | free — the onboarding screen tells the user the handle is available to
+    | purchase from the admin. Manage/sell these however you like.
+    */
+    'premium_usernames' => [
+        // Big tech & platforms
+        'google', 'facebook', 'meta', 'apple', 'amazon', 'microsoft', 'netflix',
+        'spotify', 'youtube', 'instagram', 'tiktok', 'twitter', 'x', 'snapchat',
+        'whatsapp', 'telegram', 'discord', 'twitch', 'linkedin', 'pinterest',
+        'reddit', 'tumblr', 'github', 'gitlab', 'uber', 'grab', 'foodpanda',
+        'airbnb', 'tesla', 'spacex', 'nvidia', 'intel', 'amd', 'samsung', 'huawei',
+        'xiaomi', 'sony', 'lg', 'dell', 'hp', 'lenovo', 'oracle', 'ibm', 'adobe',
+        'salesforce', 'paypal', 'stripe', 'visa', 'mastercard', 'shopify',
+        'wordpress', 'wix', 'squarespace', 'canva', 'figma', 'notion', 'slack',
+        'zoom', 'dropbox', 'cloudflare', 'openai', 'chatgpt', 'claude', 'anthropic',
+        'gemini', 'grok', 'perplexity', 'midjourney',
+        // Brands & lifestyle
+        'nike', 'adidas', 'puma', 'gucci', 'prada', 'chanel', 'dior', 'versace',
+        'rolex', 'ferrari', 'lamborghini', 'porsche', 'bmw', 'mercedes', 'toyota',
+        'honda', 'cocacola', 'pepsi', 'mcdonalds', 'kfc', 'starbucks', 'disney',
+        'marvel', 'dc', 'pixar', 'playstation', 'xbox', 'nintendo', 'steam',
+        'redbull', 'nestle', 'loreal',
+        // Crypto & finance
+        'bitcoin', 'btc', 'ethereum', 'eth', 'crypto', 'binance', 'coinbase',
+        'nft', 'web3', 'defi', 'solana', 'dogecoin', 'shiba', 'metamask', 'trust',
+        'forex', 'trading', 'invest', 'wealth', 'finance', 'bank',
+        // Trending / premium single words
+        'love', 'money', 'boss', 'king', 'queen', 'prince', 'princess', 'vip',
+        'gold', 'diamond', 'official', 'ceo', 'founder', 'business', 'marketing',
+        'digital', 'agency', 'studio', 'media', 'news', 'music', 'art', 'design',
+        'fashion', 'beauty', 'makeup', 'skincare', 'fitness', 'gym', 'health',
+        'food', 'foodie', 'travel', 'photography', 'photo', 'video', 'gaming',
+        'gamer', 'tech', 'ai', 'shop', 'store', 'sale', 'deals', 'brand', 'brands',
+        'influencer', 'creator', 'viral', 'trending', 'best', 'top', 'world',
+        'global', 'prime', 'luxury', 'elite', 'premium', 'star', 'stars',
+        'celebrity', 'model', 'models', 'coach', 'guru', 'expert', 'academy',
+        'school', 'university', 'church', 'mosque', 'temple', 'charity',
+        // Malaysia-focused (primary market)
+        'malaysia', 'my', 'kl', 'kualalumpur', 'selangor', 'johor', 'penang',
+        'melaka', 'sabah', 'sarawak', 'perak', 'kedah', 'kelantan', 'terengganu',
+        'pahang', 'negeri', 'putrajaya', 'cyberjaya', 'myr', 'ringgit', 'halal',
+        'muslim', 'islam', 'quran', 'shopee', 'lazada', 'maybank', 'cimb',
+        'touchngo', 'tng', 'astro', 'petronas', 'airasia',
+        // Globally famous mononyms
+        'ronaldo', 'messi', 'neymar', 'mbappe', 'lebron', 'jordan', 'kobe',
+        'beyonce', 'rihanna', 'drake', 'eminem', 'adele', 'madonna', 'shakira',
+        'oprah', 'elon', 'musk', 'bezos', 'gates', 'zuckerberg', 'ronaldinho',
+        'neymarjr', 'blackpink', 'bts',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Premium username purchase contact
+    |--------------------------------------------------------------------------
+    | Shown as the "contact admin to buy" link on the claim screen. Falls back
+    | to the first configured admin email.
+    */
+    'premium_username_contact' => env('PREMIUM_USERNAME_CONTACT')
+        ?: (array_values(array_filter(array_map('trim', explode(',', (string) env('ADMIN_EMAILS', '')))))[0] ?? null),
 
     'username' => [
         'min' => 3,

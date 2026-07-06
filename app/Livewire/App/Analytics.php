@@ -8,15 +8,25 @@ use App\Models\PageView;
 use App\Models\Profile;
 use App\Services\QrCodeService;
 use Illuminate\Support\Carbon;
+use Livewire\Attributes\Lazy;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
 #[Title('Dashboard')]
+#[Lazy]
 class Analytics extends Component
 {
     public int $range = 28;
+
+    /**
+     * Instant skeleton while the (query-heavy) dashboard hydrates.
+     */
+    public function placeholder()
+    {
+        return view('livewire.app.analytics-skeleton');
+    }
 
     public function setRange(int $days): void
     {

@@ -53,7 +53,13 @@ class AnalyticsTest extends TestCase
             ['link_id' => $link->id, 'profile_id' => $profile->id, 'device' => 'mobile', 'created_at' => now()],
         ]);
 
-        Livewire::actingAs($user)->test(Analytics::class)
+        $component = Livewire::actingAs($user)->test(Analytics::class);
+
+        // The dashboard is #[Lazy]; hydrate past the skeleton by firing the
+        // __lazyLoad call with the encoded param embedded in the placeholder.
+        preg_match('/__lazyLoad\((?:&#039;|\')(.+?)(?:&#039;|\')\)/', $component->html(), $m);
+
+        $component->call('__lazyLoad', $m[1])
             ->assertSee('My Site')      // top link title
             ->assertSee('50%')          // CTR: 2 clicks / 4 views
             ->assertSee('MY')           // top country

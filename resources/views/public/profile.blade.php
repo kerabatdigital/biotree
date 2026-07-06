@@ -101,6 +101,19 @@
             padding: 8px 14px; border-radius: 999px; border: 1px solid var(--btn-border);
         }
         .footer a:hover { color: var(--text); }
+
+        /* Skeleton shimmer for the avatar while it loads (mobile-first perceived speed). */
+        @keyframes bt-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        img.avatar {
+            background-image: linear-gradient(90deg,
+                color-mix(in srgb, var(--text) 8%, transparent) 25%,
+                color-mix(in srgb, var(--text) 18%, transparent) 37%,
+                color-mix(in srgb, var(--text) 8%, transparent) 63%);
+            background-size: 200% 100%;
+            animation: bt-shimmer 1.3s ease-in-out infinite;
+        }
+        img.avatar.is-loaded { background-image: none; animation: none; }
+        @media (prefers-reduced-motion: reduce) { img.avatar { animation: none; } }
     </style>
     @if ($profile->custom_css)
         <style>{!! $profile->custom_css !!}</style>
@@ -109,7 +122,9 @@
 <body>
     <main class="wrap">
         @if ($avatarUrl)
-            <img class="avatar" src="{{ $avatarUrl }}" alt="{{ $displayName }}">
+            <img class="avatar" src="{{ $avatarUrl }}" alt="{{ $displayName }}"
+                 width="96" height="96" decoding="async"
+                 onload="this.classList.add('is-loaded')" onerror="this.classList.add('is-loaded')">
         @else
             <div class="avatar-fallback">@svg('phosphor-tree-fill', ['width' => 48, 'height' => 48])</div>
         @endif
