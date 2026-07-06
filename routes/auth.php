@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Livewire\Actions\Logout;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
@@ -28,4 +29,12 @@ Route::middleware('auth')->group(function () {
 
     Volt::route('confirm-password', 'pages.auth.confirm-password')
         ->name('password.confirm');
+
+    // Named logout route for non-Livewire layouts (e.g. the admin panel) that
+    // submit a plain POST form. Reuses the same Logout action the Volt nav uses.
+    Route::post('logout', function (Logout $logout) {
+        $logout();
+
+        return redirect('/');
+    })->name('logout');
 });
