@@ -75,8 +75,7 @@ class Users extends Component
     public function getUsers()
     {
         $query = User::query()
-            ->with('profile')
-            ->withCount(['profile', 'profile.links']);
+            ->with('profile');
 
         // Search filter
         if ($this->search) {

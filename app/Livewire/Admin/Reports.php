@@ -36,6 +36,7 @@ class Reports extends Component
 
         return view('livewire.admin.reports', [
             'reports' => $reports,
+            'counts' => $this->counts,
         ])->layout('layouts.admin', ['title' => 'Reports']);
     }
 
