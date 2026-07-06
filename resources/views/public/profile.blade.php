@@ -116,7 +116,8 @@
         @media (prefers-reduced-motion: reduce) { img.avatar { animation: none; } }
     </style>
     @if ($profile->custom_css)
-        <style>{!! $profile->custom_css !!}</style>
+        {{-- Strip angle brackets as a defense-in-depth against <style>-tag breakout (stored XSS). --}}
+        <style>{!! str_replace(['<', '>'], '', $profile->custom_css) !!}</style>
     @endif
 </head>
 <body>

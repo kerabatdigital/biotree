@@ -83,6 +83,22 @@ class AppearanceEditorTest extends TestCase
             ->assertHasErrors('button_style');
     }
 
+    public function test_custom_css_with_html_tags_is_rejected(): void
+    {
+        $user = $this->onboardedUser();
+
+        Livewire::actingAs($user)->test(AppearanceEditor::class)
+            ->set('custom_css', '</style><script>alert(1)</script>')
+            ->call('save')
+            ->assertHasErrors('custom_css');
+
+        // Plain CSS still saves fine.
+        Livewire::actingAs($user)->test(AppearanceEditor::class)
+            ->set('custom_css', '.btn { color: red; }')
+            ->call('save')
+            ->assertHasNoErrors('custom_css');
+    }
+
     public function test_avatar_upload_is_stored(): void
     {
         Storage::fake('public');

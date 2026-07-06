@@ -118,7 +118,10 @@ class AppearanceEditor extends Component
             'tagline' => ['nullable', 'string', 'max:120'],
             'bio' => ['nullable', 'string', 'max:500'],
             'avatar' => ['nullable', 'image', 'max:2048'],
-            'custom_css' => ['nullable', 'string', 'max:5000'],
+            // Block angle brackets so custom CSS can never break out of the
+            // <style> tag on the public page (stored-XSS prevention). Real CSS
+            // never needs '<' or '>'.
+            'custom_css' => ['nullable', 'string', 'max:5000', 'not_regex:/[<>]/'],
             'bg' => ['required', 'string', 'max:32'],
             'bg_end' => ['required', 'string', 'max:32'],
             'text' => ['required', 'string', 'max:32'],
@@ -129,6 +132,13 @@ class AppearanceEditor extends Component
             'font' => ['required', 'in:'.implode(',', array_keys(config('biotree.fonts')))],
             'bg_animation' => ['required', 'in:'.implode(',', array_keys(config('biotree.bg_animations')))],
             'link_animation' => ['required', 'in:'.implode(',', array_keys(config('biotree.link_animations')))],
+        ];
+    }
+
+    protected function messages(): array
+    {
+        return [
+            'custom_css.not_regex' => 'Custom CSS cannot contain the characters < or >.',
         ];
     }
 
